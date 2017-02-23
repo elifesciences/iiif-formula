@@ -1,0 +1,5 @@
+base:
+    '*':
+        - elife
+        - elife.nginx
+        - iiif
