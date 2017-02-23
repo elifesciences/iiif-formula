@@ -17,7 +17,7 @@ IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
 # REDUCE_TO=1048576 #1 gb
 # REDUCE_TO=1073741824 # 1 TB
 # REDUCE_TO=2147483648 # 2 TB
-REDUCE_TO=20971520 #20 gb
+REDUCE_TO={{ pillar.iiif.loris.cache_size }} #20 gb
 
 # ...and when it is larger, start deleting files accessed more than a certain 
 # number of days ago until the cache is smaller than the configured size.
