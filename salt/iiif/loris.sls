@@ -201,10 +201,10 @@ loris-cache-clean:
         - require:
             - loris-ready
 
-    #cron.present:
-    #    - identifier: loris-cache-clean
-    #    - name: /usr/local/bin/loris-cache-clean
-    #    - user: loris
-    #    - minute: 0
-    #    - require:
-    #        - file: loris-cache-clean
+    cron.present:
+        - identifier: loris-cache-clean
+        - name: /usr/local/bin/loris-cache-clean
+        - user: loris
+        - minute: 0
+        - require:
+            - file: loris-cache-clean
