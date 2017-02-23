@@ -1,4 +1,4 @@
-/var/log/loris2/loris.log {
+/var/log/loris2/*.log {
     daily
     rotate 7
     notifempty

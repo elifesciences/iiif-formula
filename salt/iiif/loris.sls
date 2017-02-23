@@ -170,8 +170,8 @@ loris-nginx-ready:
 
 loris-ready:
     file.managed:
-        - name: /usr/local/bin/smoke-loris
-        - source: salt://iiif/config/usr-local-bin-smoke-loris
+        - name: /usr/local/bin/loris-smoke
+        - source: salt://iiif/config/usr-local-bin-loris-smoke
         - template: jinja
         - mode: 755
         - require:
@@ -188,5 +188,24 @@ loris-logrotate:
         - name: /etc/logrotate.d/loris
         - source: salt://iiif/config/etc-logrotate.d-loris
         - template: jinja
+        - require:
+            - loris-ready
 
 # TODO: optimize with unless
+
+loris-cache-clean:
+    file.managed:
+        - name: /usr/local/bin/loris-cache-clean
+        - source: salt://iiif/config/usr-local-bin-loris-cache-clean
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-ready
+
+    #cron.present:
+    #    - identifier: loris-cache-clean
+    #    - name: /usr/local/bin/loris-cache-clean
+    #    - user: loris
+    #    - minute: 0
+    #    - require:
+    #        - file: loris-cache-clean
