@@ -209,7 +209,7 @@ loris-cache-clean:
         - require:
             - file: loris-cache-clean
 
-loris-cache-clean:
+loris-cache-purge:
     file.managed:
         - name: /usr/local/bin/loris-cache-purge
         - source: salt://iiif/config/usr-local-bin-loris-cache-purge
