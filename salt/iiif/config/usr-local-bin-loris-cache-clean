@@ -1,14 +1,8 @@
 #!/bin/bash
 set -e
+# adapted from https://github.com/loris-imageserver/loris/blob/development/bin/loris-http_cache_clean.sh
 
-#
-# cache_clean.sh
-# Cron script for maintaining the loris cache size.
-#
-# CAUTION - This script deletes files. Be careful where you point it!
-#
 LOG="/var/log/loris2/cache_clean.log"
-
 # Check that the cache directories...
 IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
 IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"

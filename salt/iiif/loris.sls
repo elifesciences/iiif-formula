@@ -208,3 +208,12 @@ loris-cache-clean:
         - minute: 0
         - require:
             - file: loris-cache-clean
+
+loris-cache-clean:
+    file.managed:
+        - name: /usr/local/bin/loris-cache-purge
+        - source: salt://iiif/config/usr-local-bin-loris-cache-purge
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-ready
