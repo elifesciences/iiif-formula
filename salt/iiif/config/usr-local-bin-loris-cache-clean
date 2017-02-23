@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 #
 # cache_clean.sh
