@@ -178,8 +178,7 @@ loris-ready:
             - loris-nginx-ready
 
     cmd.run:
-        - name: |
-            smoke-loris
+        - name: loris-smoke
         - require:
             - file: loris-ready
 
