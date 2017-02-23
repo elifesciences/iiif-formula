@@ -91,6 +91,7 @@ loris-cache-general:
         - makedirs: True
         - require:
             - loris-setup
+            - mount-external-volume
 
 loris-cache-resolver:
     file.directory:
@@ -101,6 +102,7 @@ loris-cache-resolver:
         - makedirs: True
         - require:
             - loris-setup
+            - mount-external-volume
 
 loris-config:
     file.managed:

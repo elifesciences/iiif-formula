@@ -1,6 +1,6 @@
 iiif:
     loris:
-        storage: /tmp/loris
+        storage: /ext/loris
         resolver:
             #impl: loris.resolver.SimpleFSResolver
             #src_img_root: /usr/local/share/images

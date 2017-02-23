@@ -3,6 +3,7 @@ base:
         - elife
         - elife.nginx
         - elife.uwsgi
+        - elife.external-volume
         #- elife.nginx-upgrade-http
         - iiif
         - iiif.loris
