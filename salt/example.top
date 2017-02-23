@@ -2,4 +2,7 @@ base:
     '*':
         - elife
         - elife.nginx
+        - elife.uwsgi
+        #- elife.nginx-upgrade-http
         - iiif
+        - iiif.loris
