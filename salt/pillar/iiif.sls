@@ -13,7 +13,7 @@ iiif:
         # only work with TemplateHTTPResolver
         templates:
             lax: https://publishing-cdn.elifesciences.org/%s
-            journal-cms: https://prod--journal-cms.elifesciences.org/sites/default/files/%s
+            journal-cms: https://prod--journal-cms.elifesciences.org/sites/default/files/iiif/%s
 
     fallback:
         # since some .tif make Loris explode, we fall back to the equivalent JPG
