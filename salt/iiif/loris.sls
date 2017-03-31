@@ -205,7 +205,7 @@ loris-cache-clean:
         - identifier: loris-cache-clean
         - name: /usr/local/bin/loris-cache-clean
         - user: loris
-        - minute: 0
+        - minute: '*/10'
         - require:
             - file: loris-cache-clean
 
