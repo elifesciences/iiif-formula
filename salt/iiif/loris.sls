@@ -1,9 +1,11 @@
 loris-repository:
     git.latest:
-        - name: git@github.com:loris-imageserver/loris.git
-        - identity: {{ pillar.elife.projects_builder.key or '' }}
+        # read-only fork to cherry pick bugfixes
+        - name: git@github.com:elifesciences/loris.git
+        - rev: approved
         # main branch as of 2017-02-20
-        - rev: 400a4083c7ed20899424d4cc9922d158b3ec8f8d
+        #- rev: 400a4083c7ed20899424d4cc9922d158b3ec8f8d
+        - identity: {{ pillar.elife.projects_builder.key or '' }}
         - force_fetch: True
         - force_checkout: True
         - force_reset: True
