@@ -12,7 +12,7 @@ iiif:
             impl: loris.resolver.TemplateHTTPResolver
         # only work with TemplateHTTPResolver
         templates:
-            lax: https://publishing-cdn.elifesciences.org/%s
+            lax: https://s3.amazonaws.com/prod-elife-published/articles/%s
             journal-cms: https://prod--journal-cms.elifesciences.org/sites/default/files/iiif/%s
 
     fallback:
