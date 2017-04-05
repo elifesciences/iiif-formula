@@ -3,6 +3,10 @@ set -e
 # adapted from https://github.com/loris-imageserver/loris/blob/development/bin/loris-http_cache_clean.sh
 
 LOG="/var/log/loris2/cache_clean.log"
+
+echo -ne "$(date +[%c]) " >> $LOG
+echo "Started cache-clean..." >> $LOG
+
 # Check that the cache directories...
 IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
 IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
