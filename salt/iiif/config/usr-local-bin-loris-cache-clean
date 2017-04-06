@@ -26,47 +26,47 @@ REDUCE_TO={{ pillar.iiif.loris.cache_size }} #20 gb
 # executions of this script.
 
 current_usage_cache_root () {
-	du -sk $IMG_CACHE_ROOT_DIR | cut -f 1
+	du -sk "$IMG_CACHE_ROOT_DIR" | cut -f 1
 }
 
 current_usage_cache_dp () {
-	du -sk $IMG_CACHE_DP_DIR | cut -f 1
+	du -sk "$IMG_CACHE_DP_DIR" | cut -f 1
 }
 
 delete_total=0
 max_age=60 # days
 usage=$(($(current_usage_cache_dp)+$(current_usage_cache_root)))
-start_size=$usage
+start_size="$usage"
 run=1
-while [ $usage -gt $REDUCE_TO ] && [ $max_age -ge -1 ]; do
+while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
 	run=0
 
 	# files. loop (instead of -delete) so that we can keep count
-	for f in $(find $IMG_CACHE_ROOT_DIR -name loris_cache.* -type f -atime +$max_age); do
-		rm $f
+	for f in $(find "$IMG_CACHE_ROOT_DIR" -name "loris_cache.*" -type f -atime +$max_age); do
+		rm "$f"
 		let delete_total+=1
 	done
 
 	# files. loop (instead of -delete) so that we can keep count
-	for f in $(find $IMG_CACHE_DP_DIR -type f -atime +$max_age); do
-		rm $f
+	for f in $(find "$IMG_CACHE_DP_DIR" -type f -atime +$max_age); do
+		rm "$f"
 		let delete_total+=1
 	done
 
     # empty directories
-	find $IMG_CACHE_ROOT_DIR -mindepth 1 -type d -empty -delete
-	find $IMG_CACHE_DP_DIR -mindepth 1 -type d -empty -delete
+	find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
+	find "$IMG_CACHE_DP_DIR" -mindepth 1 -type d -empty -delete
 
 	let max_age-=1 || true
 	usage=$(($(current_usage_cache_dp)+$(current_usage_cache_root)))
 done
 
-echo -ne "$(date +[%c]) " >> $LOG
-if [ $run == 0 ]; then
-	echo -ne "Deleted $delete_total files to " >> $LOG
-	echo "get cache from $start_size kb to $usage kb." >> $LOG
+echo -ne "$(date +[%c]) " >> "$LOG"
+if [ "$run" == 0 ]; then
+	echo -ne "Deleted $delete_total files to " >> "$LOG"
+	echo "get cache from $start_size kb to $usage kb." >> "$LOG"
 else
-	echo "Cache at $usage kb (no deletes required)." >> $LOG
+	echo "Cache at $usage kb (no deletes required)." >> "$LOG"
 fi
 
 
