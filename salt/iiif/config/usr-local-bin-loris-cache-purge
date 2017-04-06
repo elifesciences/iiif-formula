@@ -7,8 +7,12 @@ LOG="/var/log/loris2/cache_clean.log"
 IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
 IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
 
+log_message () {
+    echo -ne "$(date +[%c]) " >> "$LOG"
+    echo "$1" >> "$LOG"
+}
+
 rm -rf $IMG_CACHE_ROOT_DIR/*
 rm -rf $IMG_CACHE_DP_DIR/*
 
-echo -ne "$(date +[%c]) " >> $LOG
-echo "Cache purged" >> $LOG
+log_message "Cache completely purged!" 

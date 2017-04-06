@@ -45,6 +45,7 @@ start_size="$usage"
 run=1
 while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
 	run=0
+    log_message "Setting max age to $max_age"
 
 	# files. loop (instead of -delete) so that we can keep count
     log_message "Deleting loris_cache.* old files"
@@ -61,10 +62,30 @@ while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
 	done
 
     # empty directories
-    log_message "Deleting $IMG_CACHE_ROOT_DIR empty directories"
-	find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
-    log_message "Deleting $IMG_CACHE_DP_DIR empty directories"
-	find "$IMG_CACHE_DP_DIR" -mindepth 1 -type d -empty -delete
+    # deleting those is in race condition with:
+    # Traceback (most recent call last):
+    # File "/opt/loris/loris/webapp.py", line 395, in __call__
+    # return self.wsgi_app(environ, start_response)
+    # File "/opt/loris/loris/webapp.py", line 346, in wsgi_app
+    # response = self.route(request)
+    # File "/opt/loris/loris/webapp.py", line 389, in route
+    # return self.get_img(request, ident, region, size, rotation, quality, fmt, base_ur
+    # i)
+    # File "/opt/loris/loris/webapp.py", line 552, in get_img
+    # src_fp, src_format = self.resolver.resolve(ident)
+    # File "/opt/loris/loris/resolver.py", line 350, in resolve
+    # cached_file_path = self.copy_to_cache(ident)
+    # File "/opt/loris/loris/resolver.py", line 331, in copy_to_cache
+    # with tempfile.NamedTemporaryFile(dir=cache_dir, delete=False) as tmp_file:
+    # File "/usr/lib/python2.7/tempfile.py", line 475, in NamedTemporaryFile
+    # (fd, name) = _mkstemp_inner(dir, prefix, suffix, flags)
+    # File "/usr/lib/python2.7/tempfile.py", line 244, in _mkstemp_inner
+    # fd = _os.open(file, flags, 0600)
+    # OSError: [Errno 2] No such file or directory: '/ext/loris/cache-resolver/lax/5e/aec/e8f/6e4/548/522/137/903/6f4/4d4/68d/tmpIMyGPB'
+    #log_message "Deleting $IMG_CACHE_ROOT_DIR empty directories"
+	#find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
+    #log_message "Deleting $IMG_CACHE_DP_DIR empty directories"
+	#find "$IMG_CACHE_DP_DIR" -mindepth 1 -type d -empty -delete
 
 	let max_age-=1 || true
 	usage=$(($(current_usage_cache_dp)+$(current_usage_cache_root)))
