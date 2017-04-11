@@ -3,13 +3,17 @@ elifePipeline {
         checkout scm
     }
 
+    stage 'List all files', {
+        sh './list-all-figures.sh > list-all-figures.log'
+    }
+
     lock('iiif--ci') {
         stage 'Deploy to IIIF server', {
             builderDeployRevision 'iiif--ci', params.revision
         }
 
         stage 'Load all articles .tif files', {
-            sh './list-all-figures.sh | ./load-figures.sh | tee load-figures.log'
+            sh 'cat list-all-figures.log | ./load-figures.sh | tee load-figures.log'
         }
     }
 
