@@ -36,7 +36,7 @@ log_message () {
 }
 
 delete_total=0
-max_age=7 # days
+max_age=3 # days
 usage=$(current_usage_cache_root)
 start_size="$usage"
 run=1
