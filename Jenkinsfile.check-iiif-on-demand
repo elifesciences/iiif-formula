@@ -1,4 +1,4 @@
-elifePipeline(body: {
+elifePipeline({
     stage 'Checkout formula', {
         checkout scm
     }
