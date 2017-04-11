@@ -1,7 +1,7 @@
 elifePipeline {
     lock('iiif--ci') {
         stage 'Create IIIF server', {
-            builderDeployRevision 'iiif--ci', parameters.revision
+            builderDeployRevision 'iiif--ci', params.revision
         }
 
         stage 'Test all articles .tif files', {
