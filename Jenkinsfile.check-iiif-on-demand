@@ -8,8 +8,12 @@ elifePipeline {
             builderDeployRevision 'iiif--ci', params.revision
         }
 
-        stage 'Test all articles .tif files', {
-            sh './list-all-figures.sh | ./test-all-figures.sh'
+        stage 'Load all articles .tif files', {
+            sh './list-all-figures.sh | ./load-figures.sh'
         }
+    }
+
+    stage 'Check log .tif files', {
+        sh './check-log-figure.sh load-figures.log'
     }
 }
