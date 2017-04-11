@@ -4,7 +4,7 @@ elifePipeline {
     }
 
     lock('iiif--ci') {
-        stage 'Create IIIF server', {
+        stage 'Deploy to IIIF server', {
             builderDeployRevision 'iiif--ci', params.revision
         }
 
