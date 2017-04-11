@@ -207,7 +207,7 @@ loris-cache-clean:
 
     cron.present:
         - identifier: loris-cache-clean
-        - name: /usr/local/bin/loris-cache-clean
+        - name: flock -n /tmp/loris-cache-clean /usr/local/bin/loris-cache-clean
         - user: loris
         - minute: '*/10'
         - require:
