@@ -1,0 +1,11 @@
+elifePipeline {
+    lock('iiif--ci') {
+        stage 'Create IIIF server', {
+            builderDeployRevision 'iiif--ci', parameters.revision
+        }
+
+        stage 'Test all articles .tif files', {
+            sh './list-all-figures | ./test-all-figures.sh'
+        }
+    }
+}
