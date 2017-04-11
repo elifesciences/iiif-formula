@@ -5,6 +5,7 @@ elifePipeline(body: {
 
     stage 'List all files', {
         sh './list-all-figures.sh > list-all-figures.log'
+        archive 'list-all-figures.log'
     }
 
     lock('iiif--ci') {
@@ -14,6 +15,7 @@ elifePipeline(body: {
 
         stage 'Load all articles .tif files', {
             sh 'cat list-all-figures.log | ./load-figures.sh | tee load-figures.log'
+            archive 'load-figures.log'
         }
     }
 
