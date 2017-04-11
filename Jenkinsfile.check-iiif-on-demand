@@ -1,4 +1,8 @@
 elifePipeline {
+    stage 'Checkout formula', {
+        checkout scm
+    }
+
     lock('iiif--ci') {
         stage 'Create IIIF server', {
             builderDeployRevision 'iiif--ci', params.revision
