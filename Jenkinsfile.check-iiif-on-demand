@@ -9,7 +9,7 @@ elifePipeline {
         }
 
         stage 'Test all articles .tif files', {
-            sh './list-all-figures | ./test-all-figures.sh'
+            sh './list-all-figures.sh | ./test-all-figures.sh'
         }
     }
 }
