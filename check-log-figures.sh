@@ -8,9 +8,9 @@ fi
 
 log_file="$1"
 
-errors=$(cat $log_file | cut -d , -f 2 | grep -vc 200 )
+errors=$(cut -d , -f 2 < "$log_file" | grep -vc 200 )
 if [ "$errors" != 0 ]; then
     echo "Errors in loading figures:"
-    grep -v 200 $log_file
-    exit $errors
+    grep -v 200 "$log_file"
+    exit "$errors"
 fi

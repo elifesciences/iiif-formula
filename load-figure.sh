@@ -11,7 +11,7 @@ figure="${1}"
 
 function load() {
     code=$(curl -v "$1" -o /dev/null 2>stderr.log -w "%{http_code}")
-    echo $1,$code
+    echo "$1,$code"
 }
 
 load "https://ci--iiif.elifesciences.org/lax:${figure}/info.json"
