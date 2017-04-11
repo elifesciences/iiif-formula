@@ -22,4 +22,4 @@ elifePipeline({
     stage 'Check log .tif files', {
         sh './check-log-figures.sh load-figures.log'
     }
-}, timeoutInMinutes: 240)
+}, 240)
