@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+# avoids race conditions by stopping the server before attempting to
+# clean files and folders in the caches
+
+/etc/init.d/nginx stop
+flock -n /tmp/loris-cache-clean /usr/local/bin/loris-cache-clean
+/etc/init.d/nginx start

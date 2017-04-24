@@ -205,11 +205,32 @@ loris-cache-clean:
         - require:
             - loris-ready
 
-    cron.present:
+    cron.absent:
         - identifier: loris-cache-clean
-        - name: flock -n /tmp/loris-cache-clean /usr/local/bin/loris-cache-clean
         - user: loris
-        - minute: '*/10'
+        - require:
+            - file: loris-cache-clean
+
+loris-safe-cache-clean:
+    file.managed:
+        - name: /usr/local/bin/loris-safe-cache-clean
+        - source: salt://iiif/config/usr-local-bin-loris-safe-cache-clean
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-cache-clean
+
+    cron.present:
+        - identifier: loris-safe-cache-clean
+        - name: /usr/local/bin/loris-safe-cache-clean
+        - user: root
+        {% if salt['elife.cfg']('project.node') % 2 == 1 %}
+        # odd server
+        - minute: '0,10,20,30,40,50'
+        {% else %}
+        # even server
+        - minute: '5,15,25,35,45,55'
+        {% endif %}
         - require:
             - file: loris-cache-clean
 
