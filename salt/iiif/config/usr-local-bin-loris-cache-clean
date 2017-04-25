@@ -79,10 +79,12 @@ while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
     # File "/usr/lib/python2.7/tempfile.py", line 244, in _mkstemp_inner
     # fd = _os.open(file, flags, 0600)
     # OSError: [Errno 2] No such file or directory: '/ext/loris/cache-resolver/lax/5e/aec/e8f/6e4/548/522/137/903/6f4/4d4/68d/tmpIMyGPB'
-    #log_message "Deleting $IMG_CACHE_ROOT_DIR empty directories"
-	#find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
-    #log_message "Deleting $IMG_CACHE_DP_DIR empty directories"
-	#find "$IMG_CACHE_DP_DIR" -mindepth 1 -type d -empty -delete
+    #
+    # BUT we turn off the daemon before doing it
+    log_message "Deleting $IMG_CACHE_ROOT_DIR empty directories"
+	find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
+    log_message "Deleting $IMG_CACHE_DP_DIR empty directories"
+	find "$IMG_CACHE_DP_DIR" -mindepth 1 -type d -empty -delete
 
 	let max_age-=1 || true
 	usage=$(current_usage_cache_root)
