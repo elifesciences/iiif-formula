@@ -224,7 +224,7 @@ loris-safe-cache-clean:
         - identifier: loris-safe-cache-clean
         - name: /usr/local/bin/loris-safe-cache-clean
         - user: root
-        #{% if salt['elife.cfg']('project.node') % 2 == 1 %}
+        #{% if salt['elife.cfg']('project.node', 1) % 2 == 1 %}
         ## odd server
         #- minute: '0,10,20,30,40,50'
         #{% else %}
