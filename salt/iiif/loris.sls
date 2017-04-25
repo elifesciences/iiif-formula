@@ -220,17 +220,17 @@ loris-safe-cache-clean:
         - require:
             - loris-cache-clean
 
-    cron.present:
+    cron.absent:
         - identifier: loris-safe-cache-clean
         - name: /usr/local/bin/loris-safe-cache-clean
         - user: root
-        {% if salt['elife.cfg']('project.node') % 2 == 1 %}
-        # odd server
-        - minute: '0,10,20,30,40,50'
-        {% else %}
-        # even server
-        - minute: '5,15,25,35,45,55'
-        {% endif %}
+        #{% if salt['elife.cfg']('project.node') % 2 == 1 %}
+        ## odd server
+        #- minute: '0,10,20,30,40,50'
+        #{% else %}
+        ## even server
+        #- minute: '5,15,25,35,45,55'
+        #{% endif %}
         - require:
             - file: loris-cache-clean
 
