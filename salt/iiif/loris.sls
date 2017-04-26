@@ -222,7 +222,7 @@ loris-safe-cache-clean:
 
     cron.absent:
         - identifier: loris-safe-cache-clean
-        - name: /usr/local/bin/loris-safe-cache-clean
+        - name: /usr/local/bin/loris-safe-cache-clean {{ pillar.iiif.loris.cache_size }}
         - user: root
         #{% if salt['elife.cfg']('project.node', 1) % 2 == 1 %}
         ## odd server
