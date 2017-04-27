@@ -1,101 +1,45 @@
 #!/bin/bash
 set -e
-# adapted from https://github.com/loris-imageserver/loris/blob/development/bin/loris-http_cache_clean.sh
+# avoids race conditions by stopping the server before attempting to
+# clean files and folders in the caches
+# also, in case the occupied size is too high to safely execute 
+# loris-cache-clean in time, goes for the forest-burning loris-cache-purge
+# which deletes everything without taking LRU policies into consideration
 
+if [ "$#" -lt 2 ]; then
+    echo "Usage: loris-safe-cache-clean SOFT_MAX_SIZE_KILOBYTES HARD_MAX_SIZE_KILOBYTES"
+    echo "Sample: loris-safe-cache-clean 10000000 20000000"
+    echo "       will clean the cache with LRU policies if used disk space is more than 10GB"
+    echo "       will purge the cache deleting everything if used disk space is more than 20GB"
+
+fi
+soft_limit="$1"
+hard_limit="$2"
 LOG="/var/log/loris2/cache_clean.log"
-
-echo -ne "$(date +[%c]) " >> $LOG
-echo "Started cache-clean..." >> $LOG
-
-# Check that the cache directories...
-LORIS_ROOT_DIR="{{ pillar.iiif.loris.storage }}"
-IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
-IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
-
-# ...is below a certain size...
-# REDUCE_TO=1048576 #1 gb
-# REDUCE_TO=1073741824 # 1 TB
-# REDUCE_TO=2147483648 # 2 TB
-REDUCE_TO="${1-{{ pillar.iiif.loris.cache_size }}}"
-
-# ...and when it is larger, start deleting files accessed more than a certain 
-# number of days ago until the cache is smaller than the configured size.
-
-# Note the name of the variable __REDUCE_TO__: this should not be the total 
-# amount of space you can afford for the cache, but instead the total space 
-# you can afford MINUS the amount you expect the cache to grow in between 
-# executions of this script.
 
 current_usage_cache_root () {
     df -k {{ pillar.iiif.loris.storage }} --output=used | sed 1d
 }
 
 log_message () {
-    echo -ne "$(date +[%c]) " >> "$LOG"
+    echo -ne "$(date +[%c]) [loris-safe-cache-clean] " >> "$LOG"
     echo "$1" >> "$LOG"
 }
 
-delete_total=0
-max_age=3 # days
 usage=$(current_usage_cache_root)
-start_size="$usage"
-run=1
-while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
-	run=0
-    log_message "Setting max age to $max_age"
-
-	# files. loop (instead of -delete) so that we can keep count
-    log_message "Deleting $IMG_CACHE_ROOT_DIR loris_cache.* old files"
-	for f in $(find "$IMG_CACHE_ROOT_DIR" -name "loris_cache.*" -type f -atime +$max_age); do
-		rm "$f"
-		let delete_total+=1
-	done
-
-	# files. loop (instead of -delete) so that we can keep count
-    log_message "Deleting $IMG_CACHE_DP_DIR old files"
-	for f in $(find "$IMG_CACHE_DP_DIR" -type f -atime +$max_age); do
-		rm "$f"
-		let delete_total+=1
-	done
-
-    # empty directories
-    # deleting those is in race condition with:
-    # Traceback (most recent call last):
-    # File "/opt/loris/loris/webapp.py", line 395, in __call__
-    # return self.wsgi_app(environ, start_response)
-    # File "/opt/loris/loris/webapp.py", line 346, in wsgi_app
-    # response = self.route(request)
-    # File "/opt/loris/loris/webapp.py", line 389, in route
-    # return self.get_img(request, ident, region, size, rotation, quality, fmt, base_ur
-    # i)
-    # File "/opt/loris/loris/webapp.py", line 552, in get_img
-    # src_fp, src_format = self.resolver.resolve(ident)
-    # File "/opt/loris/loris/resolver.py", line 350, in resolve
-    # cached_file_path = self.copy_to_cache(ident)
-    # File "/opt/loris/loris/resolver.py", line 331, in copy_to_cache
-    # with tempfile.NamedTemporaryFile(dir=cache_dir, delete=False) as tmp_file:
-    # File "/usr/lib/python2.7/tempfile.py", line 475, in NamedTemporaryFile
-    # (fd, name) = _mkstemp_inner(dir, prefix, suffix, flags)
-    # File "/usr/lib/python2.7/tempfile.py", line 244, in _mkstemp_inner
-    # fd = _os.open(file, flags, 0600)
-    # OSError: [Errno 2] No such file or directory: '/ext/loris/cache-resolver/lax/5e/aec/e8f/6e4/548/522/137/903/6f4/4d4/68d/tmpIMyGPB'
-    #
-    # BUT we turn off the daemon before doing it
-    log_message "Deleting $IMG_CACHE_ROOT_DIR empty directories"
-	find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
-    log_message "Deleting $IMG_CACHE_DP_DIR empty directories"
-	find "$IMG_CACHE_DP_DIR" -mindepth 1 -type d -empty -delete
-
-	let max_age-=1 || true
-	usage=$(current_usage_cache_root)
-done
-
-if [ "$run" == 0 ]; then
-    log_message "Deleted $delete_total files to get cache from $start_size kb to $usage kb."
+log_message "Cache at $usage kb"
+if [ "$usage" -lt "$soft" ]; then
+    log_message "Nothing to do"
+    exit 0
+else if [ "$usage" -lt "$hard" ]; then
+    log_message "Starting loris-cache-clean"
+    /etc/init.d/nginx stop
+    timeout 240 flock -n /tmp/loris-cache-clean /usr/local/bin/loris-cache-clean "$soft"
+    /etc/init.d/nginx start
 else
-    log_message "Cache at $usage kb (no deletes required)."
+    log_message "Starting loris-cache-purge"
+    /etc/init.d/nginx stop
+    flock -n /tmp/loris-cache-purge /usr/local/bin/loris-cache-purge
+    /etc/init.d/nginx start
 fi
-
-
-
 

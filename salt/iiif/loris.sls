@@ -196,6 +196,30 @@ loris-logrotate:
 
 # TODO: optimize with unless
 
+loris-cache-clean-soft:
+    file.managed:
+        - name: /usr/local/bin/loris-cache-clean-soft
+        - source: salt://iiif/config/usr-local-bin-loris-cache-clean-soft
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-ready
+
+loris-cache-clean-hard:
+    file.managed:
+        - name: /usr/local/bin/loris-cache-clean-hard
+        - source: salt://iiif/config/usr-local-bin-loris-cache-clean-hard
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-ready
+
+loris-cache-clean-hard-deprecated:
+    file.absent:
+        - name: /usr/local/bin/loris-cache-purge
+        - require:
+            - loris-cache-clean-hard
+
 loris-cache-clean:
     file.managed:
         - name: /usr/local/bin/loris-cache-clean
@@ -203,27 +227,16 @@ loris-cache-clean:
         - template: jinja
         - mode: 755
         - require:
-            - loris-ready
-
-    cron.absent:
-        - identifier: loris-cache-clean
-        - user: loris
-        - require:
-            - file: loris-cache-clean
-
-loris-safe-cache-clean:
-    file.managed:
-        - name: /usr/local/bin/loris-safe-cache-clean
-        - source: salt://iiif/config/usr-local-bin-loris-safe-cache-clean
-        - template: jinja
-        - mode: 755
-        - require:
-            - loris-cache-clean
+            - loris-cache-clean-soft
+            - loris-cache-clean-hard
 
     cron.absent:
         - identifier: loris-safe-cache-clean
         - name: /usr/local/bin/loris-safe-cache-clean {{ pillar.iiif.loris.cache_size }}
         - user: root
+        - require:
+            - file: loris-cache-clean
+
         #{% if salt['elife.cfg']('project.node', 1) % 2 == 1 %}
         ## odd server
         #- minute: '0,10,20,30,40,50'
@@ -231,14 +244,4 @@ loris-safe-cache-clean:
         ## even server
         #- minute: '5,15,25,35,45,55'
         #{% endif %}
-        - require:
-            - file: loris-cache-clean
 
-loris-cache-purge:
-    file.managed:
-        - name: /usr/local/bin/loris-cache-purge
-        - source: salt://iiif/config/usr-local-bin-loris-cache-purge
-        - template: jinja
-        - mode: 755
-        - require:
-            - loris-ready
