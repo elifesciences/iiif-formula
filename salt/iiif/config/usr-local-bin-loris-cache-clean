@@ -27,7 +27,7 @@ REDUCE_TO="${1-{{ pillar.iiif.loris.cache_size }}}"
 # executions of this script.
 
 current_usage_cache_root () {
-    df -k /ext/loris/ --output=used | sed 1d
+    df -k {{ pillar.iiif.loris.storage }} --output=used | sed 1d
 }
 
 log_message () {
@@ -45,7 +45,7 @@ while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
     log_message "Setting max age to $max_age"
 
 	# files. loop (instead of -delete) so that we can keep count
-    log_message "Deleting loris_cache.* old files"
+    log_message "Deleting $IMG_CACHE_ROOT_DIR loris_cache.* old files"
 	for f in $(find "$IMG_CACHE_ROOT_DIR" -name "loris_cache.*" -type f -atime +$max_age); do
 		rm "$f"
 		let delete_total+=1
