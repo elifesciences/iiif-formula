@@ -2,7 +2,44 @@
 set -e
 # avoids race conditions by stopping the server before attempting to
 # clean files and folders in the caches
+# also, in case the occupied size is too high to safely execute 
+# loris-cache-clean in time, goes for the forest-burning loris-cache-purge
+# which deletes everything without taking LRU policies into consideration
 
-/etc/init.d/nginx stop
-flock -n /tmp/loris-cache-clean /usr/local/bin/loris-cache-clean
-/etc/init.d/nginx start
+if [ "$#" -lt 2 ]; then
+    echo "Usage: loris-safe-cache-clean SOFT_MAX_SIZE_KILOBYTES HARD_MAX_SIZE_KILOBYTES"
+    echo "Sample: loris-safe-cache-clean 10000000 20000000"
+    echo "       will clean the cache with LRU policies if used disk space is more than 10GB"
+    echo "       will purge the cache deleting everything if used disk space is more than 20GB"
+
+fi
+soft_limit="$1"
+hard_limit="$2"
+LOG="/var/log/loris2/cache_clean.log"
+
+current_usage_cache_root () {
+    df -k {{ pillar.iiif.loris.storage }} --output=used | sed 1d
+}
+
+log_message () {
+    echo -ne "$(date +[%c]) [loris-safe-cache-clean] " >> "$LOG"
+    echo "$1" >> "$LOG"
+}
+
+usage=$(current_usage_cache_root)
+log_message "Cache at $usage kb"
+if [ "$usage" -lt "$soft" ]; then
+    log_message "Nothing to do"
+    exit 0
+else if [ "$usage" -lt "$hard" ]; then
+    log_message "Starting loris-cache-clean"
+    /etc/init.d/nginx stop
+    timeout 240 flock -n /tmp/loris-cache-clean /usr/local/bin/loris-cache-clean "$soft"
+    /etc/init.d/nginx start
+else
+    log_message "Starting loris-cache-purge"
+    /etc/init.d/nginx stop
+    flock -n /tmp/loris-cache-purge /usr/local/bin/loris-cache-purge
+    /etc/init.d/nginx start
+fi
+
