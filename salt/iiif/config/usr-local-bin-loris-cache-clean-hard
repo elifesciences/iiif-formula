@@ -12,7 +12,7 @@ log_message () {
     echo "$1" >> "$LOG"
 }
 
-log_message "Started loris-cache-clean-hard (arguments $1 $2)"
+log_message "Started loris-cache-clean-hard"
 
 log_message "Removing $IMG_CACHE_ROOT_DIR contents"
 rm -rf $IMG_CACHE_ROOT_DIR/*
