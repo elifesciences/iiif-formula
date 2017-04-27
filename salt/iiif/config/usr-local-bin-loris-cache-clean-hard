@@ -15,8 +15,8 @@ log_message () {
 log_message "Started loris-cache-clean-hard (arguments $1 $2)"
 
 log_message "Removing $IMG_CACHE_ROOT_DIR contents"
-rm -rf "$IMG_CACHE_ROOT_DIR/*"
+rm -rf $IMG_CACHE_ROOT_DIR/*
 log_message "Removing $IMG_CACHE_DP_DIR contents"
-rm -rf "$IMG_CACHE_DP_DIR/*"
+rm -rf $IMG_CACHE_DP_DIR/*
 
 log_message "Cache completely purged!" 
