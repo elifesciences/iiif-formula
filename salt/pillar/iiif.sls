@@ -1,7 +1,9 @@
 iiif:
     loris:
         storage: /ext/loris
-        cache_size: 2097152 # 2 GB
+        cache:
+            soft_limit: 2097152 # 2 GB
+            hard_limit: 3145728 # 3 GB
         resolver:
             #impl: loris.resolver.SimpleFSResolver
             #src_img_root: /usr/local/share/images

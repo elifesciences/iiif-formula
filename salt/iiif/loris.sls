@@ -230,13 +230,10 @@ loris-cache-clean:
             - loris-cache-clean-soft
             - loris-cache-clean-hard
 
-    cron.absent:
-        - identifier: loris-safe-cache-clean
-        - name: /usr/local/bin/loris-safe-cache-clean {{ pillar.iiif.loris.cache_size }}
+    cron.present:
+        - identifier: loris-cache-clean
+        - name: /usr/local/bin/loris-cache-clean {{ pillar.iiif.loris.cache.soft_limit }} {{ pillar.iiif.loris.cache.hard_limit }}
         - user: root
-        - require:
-            - file: loris-cache-clean
-
         #{% if salt['elife.cfg']('project.node', 1) % 2 == 1 %}
         ## odd server
         #- minute: '0,10,20,30,40,50'
@@ -244,4 +241,5 @@ loris-cache-clean:
         ## even server
         #- minute: '5,15,25,35,45,55'
         #{% endif %}
-
+        - require:
+            - file: loris-cache-clean
