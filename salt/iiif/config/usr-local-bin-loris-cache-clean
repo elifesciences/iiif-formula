@@ -38,7 +38,7 @@ if [ "$usage" -lt "$soft_limit" ]; then
 elif [ "$usage" -lt "$hard_limit" ]; then
     log_message "Starting loris-cache-clean-soft"
     /etc/init.d/nginx stop
-    timeout 240 /usr/local/bin/loris-cache-clean-soft "$soft_limit"
+    timeout 240 /usr/local/bin/loris-cache-clean-soft "$soft_limit" || echo TIMEOUT OF loris-cache-clean-soft
     /etc/init.d/nginx start
     log_message "Completed loris-cache-clean-soft"
 else
