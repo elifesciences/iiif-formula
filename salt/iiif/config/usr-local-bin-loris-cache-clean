@@ -7,8 +7,8 @@ set -e
 # which deletes everything without taking LRU policies into consideration
 
 if [ "$#" -lt 2 ]; then
-    echo "Usage: loris-safe-cache-clean SOFT_MAX_SIZE_KILOBYTES HARD_MAX_SIZE_KILOBYTES"
-    echo "Sample: loris-safe-cache-clean 10000000 20000000"
+    echo "Usage: loris-cache-clean SOFT_MAX_SIZE_KILOBYTES HARD_MAX_SIZE_KILOBYTES"
+    echo "Sample: loris-cache-clean 10000000 20000000"
     echo "       will clean the cache with LRU policies if used disk space is more than 10GB"
     echo "       will purge the cache deleting everything if used disk space is more than 20GB"
 
@@ -22,24 +22,26 @@ current_usage_cache_root () {
 }
 
 log_message () {
-    echo -ne "$(date +[%c]) [loris-safe-cache-clean] " >> "$LOG"
+    echo -ne "$(date +[%c]) [loris-cache-clean] " >> "$LOG"
     echo "$1" >> "$LOG"
 }
 
 usage=$(current_usage_cache_root)
 log_message "Cache at $usage kb"
-if [ "$usage" -lt "$soft" ]; then
+if [ "$usage" -lt "$soft_limit" ]; then
     log_message "Nothing to do"
     exit 0
-else if [ "$usage" -lt "$hard" ]; then
-    log_message "Starting loris-cache-clean"
+elif [ "$usage" -lt "$hard_limit" ]; then
+    log_message "Starting loris-cache-clean-soft"
     /etc/init.d/nginx stop
-    timeout 240 flock -n /tmp/loris-cache-clean /usr/local/bin/loris-cache-clean "$soft"
+    timeout 240 /usr/local/bin/loris-cache-clean-soft "$soft"
     /etc/init.d/nginx start
+    log_message "Completed loris-cache-clean-soft"
 else
-    log_message "Starting loris-cache-purge"
+    log_message "Starting loris-cache-clean-hard"
     /etc/init.d/nginx stop
-    flock -n /tmp/loris-cache-purge /usr/local/bin/loris-cache-purge
+    /usr/local/bin/loris-cache-clean-hard
     /etc/init.d/nginx start
+    log_message "Completed loris-cache-clean-hard"
 fi
 

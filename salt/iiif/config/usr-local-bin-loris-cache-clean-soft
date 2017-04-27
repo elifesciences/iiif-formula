@@ -4,11 +4,14 @@ set -e
 
 LOG="/var/log/loris2/cache_clean.log"
 
-echo -ne "$(date +[%c]) " >> $LOG
-echo "Started cache-clean..." >> $LOG
+log_message () {
+    echo -ne "$(date +[%c]) [loris-cache-clean-soft] " >> "$LOG"
+    echo "$1" >> "$LOG"
+}
+
+log_message "Started cache-clean-soft..."
 
 # Check that the cache directories...
-LORIS_ROOT_DIR="{{ pillar.iiif.loris.storage }}"
 IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
 IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
 
@@ -28,11 +31,6 @@ REDUCE_TO="${1-{{ pillar.iiif.loris.cache_size }}}"
 
 current_usage_cache_root () {
     df -k {{ pillar.iiif.loris.storage }} --output=used | sed 1d
-}
-
-log_message () {
-    echo -ne "$(date +[%c]) " >> "$LOG"
-    echo "$1" >> "$LOG"
 }
 
 delete_total=0
