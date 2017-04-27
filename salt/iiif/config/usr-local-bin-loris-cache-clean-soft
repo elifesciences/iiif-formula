@@ -2,6 +2,12 @@
 set -e
 # adapted from https://github.com/loris-imageserver/loris/blob/development/bin/loris-http_cache_clean.sh
 
+if [ "$#" -lt 1 ]; then
+    echo "Usage: loris-cache-clean-soft SOFT_MAX_SIZE_KILOBYTES"
+    echo "Sample: loris-cache-clean-soft 10000000"
+    exit 1
+fi
+
 LOG="/var/log/loris2/cache_clean.log"
 
 log_message () {
@@ -9,7 +15,7 @@ log_message () {
     echo "$1" >> "$LOG"
 }
 
-log_message "Started cache-clean-soft..."
+log_message "Started loris-cache-clean-soft (arguments $1)"
 
 # Check that the cache directories...
 IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
@@ -19,7 +25,7 @@ IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
 # REDUCE_TO=1048576 #1 gb
 # REDUCE_TO=1073741824 # 1 TB
 # REDUCE_TO=2147483648 # 2 TB
-REDUCE_TO="${1-{{ pillar.iiif.loris.cache_size }}}"
+REDUCE_TO="$1"
 
 # ...and when it is larger, start deleting files accessed more than a certain 
 # number of days ago until the cache is smaller than the configured size.

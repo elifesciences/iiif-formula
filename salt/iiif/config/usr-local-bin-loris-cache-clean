@@ -11,10 +11,9 @@ if [ "$#" -lt 2 ]; then
     echo "Sample: loris-cache-clean 10000000 20000000"
     echo "       will clean the cache with LRU policies if used disk space is more than 10GB"
     echo "       will purge the cache deleting everything if used disk space is more than 20GB"
-
+    exit 1
 fi
-soft_limit="$1"
-hard_limit="$2"
+
 LOG="/var/log/loris2/cache_clean.log"
 
 current_usage_cache_root () {
@@ -26,6 +25,11 @@ log_message () {
     echo "$1" >> "$LOG"
 }
 
+log_message "Started loris-cache-clean (arguments $1 $2)"
+
+soft_limit="$1"
+hard_limit="$2"
+
 usage=$(current_usage_cache_root)
 log_message "Cache at $usage kb"
 if [ "$usage" -lt "$soft_limit" ]; then
@@ -34,7 +38,7 @@ if [ "$usage" -lt "$soft_limit" ]; then
 elif [ "$usage" -lt "$hard_limit" ]; then
     log_message "Starting loris-cache-clean-soft"
     /etc/init.d/nginx stop
-    timeout 240 /usr/local/bin/loris-cache-clean-soft "$soft"
+    timeout 240 /usr/local/bin/loris-cache-clean-soft "$soft_limit"
     /etc/init.d/nginx start
     log_message "Completed loris-cache-clean-soft"
 else

@@ -1,18 +1,22 @@
 #!/bin/bash
 set -e
+# aggressively deletes the whole cache
 
-# Aggressively delete the whole cache
 LOG="/var/log/loris2/cache_clean.log"
 
 IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
 IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
 
 log_message () {
-    echo -ne "$(date +[%c]) [loris-cache-clean-hard]" >> "$LOG"
+    echo -ne "$(date +[%c]) [loris-cache-clean-hard] " >> "$LOG"
     echo "$1" >> "$LOG"
 }
 
+log_message "Started loris-cache-clean-hard (arguments $1 $2)"
+
+log_message "Removing $IMG_CACHE_ROOT_DIR contents"
 rm -rf "$IMG_CACHE_ROOT_DIR/*"
+log_message "Removing $IMG_CACHE_DP_DIR contents"
 rm -rf "$IMG_CACHE_DP_DIR/*"
 
 log_message "Cache completely purged!" 
