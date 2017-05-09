@@ -243,3 +243,9 @@ loris-cache-clean:
         {% endif %}
         - require:
             - file: loris-cache-clean
+
+monitoring-utilities:
+    pkg.installed:
+        - pkgs:
+            - systat # iostat 1
+            - iotop # sudo iotop
