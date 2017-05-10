@@ -49,11 +49,11 @@ loris-dependencies:
 
     cmd.run:
         - name: |
-            echo "don't do anything for now"
             venv/bin/pip install Werkzeug
             venv/bin/pip install configobj
             venv/bin/pip install Pillow
             venv/bin/pip install uwsgi==2.0.14
+            NEW_RELIC_EXTENSIONS=false venv/bin/pip install --no-binary :all: newrelic==2.86.0.65
         - cwd: /opt/loris
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
@@ -138,13 +138,35 @@ loris-uwsgi-log:
         # don't want to lose any write to this
         - mode: 666
 
+loris-application-log-directory:
+    file.directory:
+        - name: /var/log/loris2/
+        - user: loris
+        - group: loris
+        - mode: 777
+        - require:
+            - loris-config
+
+loris-application-log-main-file:
+    file.managed:
+        - name: /var/log/loris2/loris.log
+        - user: loris
+        - group: loris
+        # don't want to lose any write to this
+        - mode: 666
+        - require:
+            - loris-application-log-directory
+
 loris-uwsgi-ready:
     file.managed:
         - name: /etc/init/uwsgi-loris.conf
         - source: salt://iiif/config/etc-init-uwsgi-loris.conf
+        - template: jinja
         - require:
             - loris-uwsgi-configuration
             - loris-uwsgi-log
+            - loris-application-log-directory
+            - loris-application-log-main-file
 
     service.running:
         - name: uwsgi-loris

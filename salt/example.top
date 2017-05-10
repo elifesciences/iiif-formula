@@ -4,6 +4,7 @@ base:
         - elife.nginx
         - elife.uwsgi
         - elife.external-volume
-        #- elife.nginx-upgrade-http
         - iiif
         - iiif.loris
+        # see sample pillar to enable new relic
+        #- elife.newrelic-python
