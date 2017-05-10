@@ -247,5 +247,5 @@ loris-cache-clean:
 monitoring-utilities:
     pkg.installed:
         - pkgs:
-            - systat # iostat 1
+            - sysstat # iostat 1
             - iotop # sudo iotop
