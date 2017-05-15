@@ -1,3 +1,9 @@
+maintenance-mode-start:
+    cmd.run:
+        - name: /etc/init.d/nginx stop
+        - require:
+            - nginx-server-service
+        
 loris-repository:
     git.latest:
         # read-only fork to cherry pick bugfixes
@@ -187,12 +193,17 @@ loris-nginx-ready:
         - require:
             - loris-uwsgi-ready
 
-    service.running:
-        - name: nginx
-        - enable: True
-        - reload: True
-        - watch:
+maintenance-mode-end:
+    cmd.run:
+        - name: /etc/init.d/nginx start
+        - require:
             - file: loris-nginx-ready
+
+maintenance-mode-check-nginx-stays-up:
+    cmd.run:
+        - name: sleep 2 && /etc/init.d/nginx status
+        - require:
+            - maintenance-mode-end
 
 loris-ready:
     file.managed:
@@ -201,7 +212,7 @@ loris-ready:
         - template: jinja
         - mode: 755
         - require:
-            - loris-nginx-ready
+            - maintenance-mode-check-nginx-stays-up
 
     cmd.run:
         - name: loris-smoke
