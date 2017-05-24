@@ -142,26 +142,22 @@ loris-uwsgi-log:
     file.managed:
         - name: /var/log/uwsgi-loris.log
         # don't want to lose any write to this
-        - mode: 666
+        - user: loris
+        - group: loris
+        - mode: 664
+
+loris-old-log-file:
+    file.absent:
+        - name: /var/log/loris2/loris.log
 
 loris-application-log-directory:
     file.directory:
         - name: /var/log/loris2/
         - user: loris
         - group: loris
-        - mode: 777
+        - mode: 664
         - require:
             - loris-config
-
-loris-application-log-main-file:
-    file.managed:
-        - name: /var/log/loris2/loris.log
-        - user: loris
-        - group: loris
-        # don't want to lose any write to this
-        - mode: 666
-        - require:
-            - loris-application-log-directory
 
 loris-uwsgi-ready:
     file.managed:
@@ -172,7 +168,6 @@ loris-uwsgi-ready:
             - loris-uwsgi-configuration
             - loris-uwsgi-log
             - loris-application-log-directory
-            - loris-application-log-main-file
 
     service.running:
         - name: uwsgi-loris
