@@ -4,6 +4,8 @@ set -e
 
 LOG="/var/log/loris2/cache_clean.log"
 
+# rsync... http://www.slashroot.in/which-is-the-fastest-method-to-delete-files-in-linux
+BLANK_DIR="{{ pillar.iiif.loris.storage}}/blank"
 IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
 IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
 
@@ -14,9 +16,11 @@ log_message () {
 
 log_message "Started loris-cache-clean-hard"
 
+log_message "Creating blank folder to rsync"
+mkdir -p $BLANK_DIR
 log_message "Removing $IMG_CACHE_ROOT_DIR contents"
-rm -rf $IMG_CACHE_ROOT_DIR/*
+rsync -a --delete $BLANK_DIR/ $IMG_CACHE_ROOT_DIR/
 log_message "Removing $IMG_CACHE_DP_DIR contents"
-rm -rf $IMG_CACHE_DP_DIR/*
+rsync -a --delete $BLANK_DIR/ $IMG_CACHE_DP_DIR/
 
 log_message "Cache completely purged!" 
