@@ -114,6 +114,18 @@ loris-cache-resolver:
             - loris-setup
             - mount-external-volume
 
+# empty folder that can be synced over the caches to clean them
+loris-cache-black:
+    file.directory:
+        - name: {{ pillar.iiif.loris.storage }}/blank
+        - user: loris
+        - group: loris
+        - dir_mode: 755
+        - makedirs: True
+        - require:
+            - loris-setup
+            - mount-external-volume
+
 loris-config:
     file.managed:
         - name: /etc/loris2/loris2.conf

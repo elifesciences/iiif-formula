@@ -17,8 +17,6 @@ log_message () {
 
 log_message "Started loris-cache-clean-hard"
 
-log_message "Creating blank folder to rsync"
-mkdir -p $BLANK_DIR
 log_message "Removing $IMG_CACHE_ROOT_DIR contents"
 rsync -a --delete $BLANK_DIR/ $IMG_CACHE_ROOT_DIR/
 log_message "Removing $IMG_CACHE_DP_DIR contents"
