@@ -78,9 +78,6 @@ loris-images-folder:
         - name: /usr/local/share/images
         - user: loris
 
-# only runs on second time?
-# has to be run multiple times, unclear what it's doing
-# add requires, experiment
 loris-setup:
     cmd.run:
         - name: |
@@ -91,6 +88,17 @@ loris-setup:
             - loris-dependencies
             - loris-user
             - loris-images-folder
+
+loris-tmp-directory:
+    file.directory:
+        - name: {{ pillar.iiif.loris.storage }}/tmp
+        - user: loris
+        - group: loris
+        - dir_mode: 755
+        - makedirs: True
+        - require:
+            - loris-setup
+            - mount-external-volume
 
 loris-cache-general:
     file.directory:
@@ -133,6 +141,7 @@ loris-config:
         - template: jinja
         - require:
             - loris-setup
+            - loris-tmp-directory
             - loris-cache-general
             - loris-cache-resolver
 
