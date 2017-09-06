@@ -7,6 +7,8 @@ After=network.target
 
 [Service]
 Restart=on-failure
+KillSignal=SIGQUIT
+Type=notify
 {% if pillar.elife.newrelic.enabled %}
 Environment="NEW_RELIC_CONFIG_FILE=/opt/loris/newrelic.ini"
 ExecStart=/opt/loris/venv/bin/newrelic-admin run-program /opt/loris/venv/bin/uwsgi --ini /etc/loris2/uwsgi.ini
