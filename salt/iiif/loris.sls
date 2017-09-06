@@ -1,3 +1,5 @@
+{% set trusty = salt['grains.get']('oscodename') == 'trusty' %}
+
 maintenance-mode-start:
     cmd.run:
         - name: /etc/init.d/nginx stop
@@ -42,13 +44,16 @@ loris-dependencies:
             - libfreetype6
             - libfreetype6-dev
             - zlib1g-dev
+            {% if trusty %}
             - liblcms
             - liblcms-dev
             - liblcms-utils
+            - libtiff4-dev
+            {% endif %}
+
             - liblcms2-2 
             - liblcms2-dev 
             - liblcms2-utils
-            - libtiff4-dev
             - libtiff5-dev
             - libxml2-dev
             - libxslt1-dev
@@ -180,20 +185,29 @@ loris-application-log-directory:
         - require:
             - loris-config
 
-loris-uwsgi-ready:
+loris-uwsgi-upstart:
     file.managed:
         - name: /etc/init/uwsgi-loris.conf
         - source: salt://iiif/config/etc-init-uwsgi-loris.conf
         - template: jinja
-        - require:
-            - loris-uwsgi-configuration
-            - loris-uwsgi-log
-            - loris-application-log-directory
 
+loris-uwsgi-systemd:
+    file.managed:
+        - name: /lib/systemd/system/uwsgi-loris.service
+        - source: salt://iiif/config/lib-systemd-system-uwsgi-loris.service
+        - template: jinja
+
+loris-uwsgi-ready:
     service.running:
         - name: uwsgi-loris
         - enable: True
         - restart: True
+        - require:
+            - loris-uwsgi-systemd
+            - loris-uwsgi-upstart
+            - loris-uwsgi-configuration
+            - loris-uwsgi-log
+            - loris-application-log-directory
         - watch:
             - loris-repository
             - loris-dependencies
