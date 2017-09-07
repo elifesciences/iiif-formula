@@ -8,7 +8,7 @@ loris-repository:
     git.latest:
         # read-only fork to cherry pick bugfixes
         - name: git@github.com:elifesciences/loris.git
-        - rev: {{ salt['elife.rev']() }}
+        - rev: {{ salt['elife.rev'](default_branch='approved') }}
         # fixed revision with tested code
         #- rev: approved
         # main branch as of 2017-02-20
