@@ -13,7 +13,7 @@ host="${2:-ci--iiif.elifesciences.org}"
 function load() {
     code=$(curl -v "$1" -o /dev/null 2>stderr.log -w "%{http_code}")
     if [ "$code" -eq "504" ]; then
-        // retry once
+        # retry once
         code=$(curl -v "$1" -o /dev/null 2>stderr.log -w "%{http_code}")
     fi
     echo "$1,$code"
