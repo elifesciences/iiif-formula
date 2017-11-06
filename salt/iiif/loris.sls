@@ -234,6 +234,7 @@ loris-ready:
         - name: |
             wait_for_port 80
             loris-smoke
+        - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - file: loris-ready
 
