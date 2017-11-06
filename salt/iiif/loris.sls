@@ -231,7 +231,9 @@ loris-ready:
             - maintenance-mode-check-nginx-stays-up
 
     cmd.run:
-        - name: loris-smoke
+        - name: |
+            wait_for_port 80
+            loris-smoke
         - require:
             - file: loris-ready
 
