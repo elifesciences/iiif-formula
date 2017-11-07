@@ -6,5 +6,5 @@ base:
         - elife.external-volume
         - iiif
         - iiif.loris
-        # see sample pillar to enable new relic
-        #- elife.newrelic-python
+        # only does something on EC2
+        - elife.newrelic-python
