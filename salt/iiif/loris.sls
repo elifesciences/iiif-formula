@@ -55,9 +55,9 @@ loris-dependencies:
 
     cmd.run:
         - name: |
-            venv/bin/pip install Werkzeug
-            venv/bin/pip install configobj
-            venv/bin/pip install Pillow
+            venv/bin/pip install Werkzeug==0.12.1
+            venv/bin/pip install configobj==5.0.6
+            venv/bin/pip install Pillow==4.1.0
             venv/bin/pip install uwsgi==2.0.14
             NEW_RELIC_EXTENSIONS=false venv/bin/pip install --no-binary :all: newrelic==2.86.0.65
         - cwd: /opt/loris
