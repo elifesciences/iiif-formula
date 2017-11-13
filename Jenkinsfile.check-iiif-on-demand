@@ -5,6 +5,8 @@ elifePipeline({
 
     stage 'List all files', {
         sh './list-all-figures.sh > list-all-figures.log'
+        def figuresNumber = sh(script: 'wc -l list-all-figures.log', returnStdout: true)
+        echo "Total number of figures to test: ${figuresNumber}"
         archive 'list-all-figures.log'
     }
 

@@ -10,7 +10,7 @@ loris-repository:
     git.latest:
         # read-only fork to cherry pick bugfixes
         - name: git@github.com:elifesciences/loris.git
-        - rev: {{ salt['elife.rev']() }}
+        - rev: {{ salt['elife.rev'](default_branch='approved') }}
         # fixed revision with tested code
         #- rev: approved
         # main branch as of 2017-02-20
@@ -60,9 +60,9 @@ loris-dependencies:
 
     cmd.run:
         - name: |
-            venv/bin/pip install Werkzeug
-            venv/bin/pip install configobj
-            venv/bin/pip install Pillow
+            venv/bin/pip install Werkzeug==0.12.1
+            venv/bin/pip install configobj==5.0.6
+            venv/bin/pip install Pillow==4.1.0
             venv/bin/pip install uwsgi==2.0.14
             NEW_RELIC_EXTENSIONS=false venv/bin/pip install --no-binary :all: newrelic==2.86.0.65
         - cwd: /opt/loris
@@ -245,7 +245,10 @@ loris-ready:
             - maintenance-mode-check-nginx-stays-up
 
     cmd.run:
-        - name: loris-smoke
+        - name: |
+            wait_for_port 80
+            loris-smoke
+        - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - file: loris-ready
 

@@ -4,7 +4,7 @@ base:
         - elife.nginx
         - elife.uwsgi
         - elife.external-volume
+        # only does something on EC2
+        - elife.newrelic-python
         - iiif
         - iiif.loris
-        # see sample pillar to enable new relic
-        #- elife.newrelic-python
