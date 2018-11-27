@@ -15,12 +15,3 @@
     compress
     copytruncate
 }
-
-/var/log/upstart/uwsgi-loris.log {
-    daily
-    rotate 7
-    notifempty
-    missingok
-    compress
-    copytruncate
-}
