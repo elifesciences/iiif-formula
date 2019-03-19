@@ -1,5 +1,7 @@
-{% set trusty = salt['grains.get']('oscodename') == 'trusty' %}
+{% set osrelease = salt['grains.get']('osrelease') %}
 
+# lsh 2019-03-19: what problem is this trying to solve?
+# TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-start:
     cmd.run:
         - name: /etc/init.d/nginx stop
@@ -44,7 +46,7 @@ loris-dependencies:
             - libfreetype6
             - libfreetype6-dev
             - zlib1g-dev
-            {% if trusty %}
+            {% if osrelease == "14.04" %}
             - liblcms
             - liblcms-dev
             - liblcms-utils
@@ -58,12 +60,14 @@ loris-dependencies:
             - libxml2-dev
             - libxslt1-dev
 
+    # TODO: these requirements best live in a requirements.txt file where we can get security feedback
     cmd.run:
         - name: |
+            set -e
             venv/bin/pip install Werkzeug==0.12.1
             venv/bin/pip install configobj==5.0.6
             venv/bin/pip install Pillow==4.1.0
-            venv/bin/pip install uwsgi==2.0.14
+            venv/bin/pip install uwsgi==2.0.17.1
             NEW_RELIC_EXTENSIONS=false venv/bin/pip install --no-binary :all: newrelic==2.86.0.65
         - cwd: /opt/loris
         - user: {{ pillar.elife.deploy_user.username }}
@@ -71,7 +75,7 @@ loris-dependencies:
             - loris-repository
             - pkg: loris-dependencies
 
-
+# lsh 2019-03-19: why a special 'loris' user and not www-data?
 loris-user:
     user.present: 
         - name: loris
@@ -159,22 +163,31 @@ loris-wsgi-entry-point:
 
 loris-uwsgi-configuration:
     file.managed:
+        {% if osrelease == "14.04" %}
         - name: /etc/loris2/uwsgi.ini
+        {% else %}
+        # systemd service file expects to find uwsgi.ini in app folder
+        # see builder-base.uwsgi
+        - name: /opt/loris/uwsgi.ini
+        {% endif %}
         - source: salt://iiif/config/etc-loris2-uwsgi.ini
+        - template: jinja
         - require:
             - loris-setup
 
+# deprecated, systemd managed uwsgi will write to /var/log/uwsgi.log
 loris-uwsgi-log:
+{% if osrelease == "14.04" %}
     file.managed:
         - name: /var/log/uwsgi-loris.log
         # don't want to lose any write to this
         - user: loris
         - group: loris
         - mode: 664
-
-loris-old-log-file:
+{% else %}
     file.absent:
-        - name: /var/log/loris2/loris.log
+        - name: /var/log/uwsgi-loris.log
+{% endif %}
 
 loris-application-log-directory:
     file.directory:
@@ -191,11 +204,13 @@ loris-uwsgi-upstart:
         - source: salt://iiif/config/etc-init-uwsgi-loris.conf
         - template: jinja
 
-loris-uwsgi-systemd:
-    file.managed:
-        - name: /lib/systemd/system/uwsgi-loris.service
-        - source: salt://iiif/config/lib-systemd-system-uwsgi-loris.service
-        - template: jinja
+{% if osrelease != "14.04" %}
+uwsgi-loris.socket:
+    service.running:
+        - enable: True
+        - require_in:
+            - loris-uwsgi-ready
+{% endif %}
 
 loris-uwsgi-ready:
     service.running:
@@ -203,7 +218,6 @@ loris-uwsgi-ready:
         - enable: True
         - restart: True
         - require:
-            - loris-uwsgi-systemd
             - loris-uwsgi-upstart
             - loris-uwsgi-configuration
             - loris-uwsgi-log
@@ -223,12 +237,14 @@ loris-nginx-ready:
         - require:
             - loris-uwsgi-ready
 
+# TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-end:
     cmd.run:
         - name: /etc/init.d/nginx start
         - require:
             - file: loris-nginx-ready
 
+# TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-check-nginx-stays-up:
     cmd.run:
         - name: sleep 2 && /etc/init.d/nginx status
@@ -309,9 +325,3 @@ loris-cache-clean:
         {% endif %}
         - require:
             - file: loris-cache-clean
-
-monitoring-utilities:
-    pkg.installed:
-        - pkgs:
-            - sysstat # iostat 1
-            - iotop # sudo iotop

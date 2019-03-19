@@ -21,10 +21,17 @@ iiif:
         # since some .tif make Loris explode, we fall back to the equivalent JPG
         tif: jpg
         
+elife:
+
 # to enable New Relic APM for the Python application
 # depends on pillar.elife.newrelic in builder-base-formula
-#elife:
 #    newrelic_python:
 #        application_folder: /opt/loris
 #        service: loris-uwsgi-ready
 #        dependency_state: loris-setup
+
+    # 16.04+ systemd managed uwsgi
+    uwsgi:
+        services:
+            loris:
+                folder: /opt/loris
