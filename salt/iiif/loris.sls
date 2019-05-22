@@ -175,7 +175,7 @@ loris-uwsgi-configuration:
         - require:
             - loris-setup
 
-# deprecated, systemd managed uwsgi will write to /var/log/uwsgi.log
+# deprecated, systemd managed uwsgi will write to /var/log/uwsgi-loris.log
 loris-uwsgi-log:
 {% if osrelease == "14.04" %}
     file.managed:
@@ -185,8 +185,11 @@ loris-uwsgi-log:
         - group: loris
         - mode: 664
 {% else %}
-    file.absent:
+    # handled by state "uwsgi-$name.log" in "elife.uwsgi"
+    file.exists:
         - name: /var/log/uwsgi-loris.log
+        - require:
+            - uwsgi-loris.log
 {% endif %}
 
 loris-application-log-directory:
@@ -209,7 +212,7 @@ uwsgi-loris.socket:
     service.running:
         - enable: True
         - require_in:
-            - loris-uwsgi-ready
+            - service: loris-uwsgi-ready
 {% endif %}
 
 loris-uwsgi-ready:
