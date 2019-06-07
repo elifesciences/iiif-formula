@@ -32,6 +32,7 @@ elife:
 
     # 16.04+ systemd managed uwsgi
     uwsgi:
+        username: loris
         services:
             loris:
                 folder: /opt/loris
