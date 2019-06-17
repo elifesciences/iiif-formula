@@ -81,6 +81,10 @@ loris-user:
         - name: loris
         - shell: /sbin/false
         - home: /home/loris
+{% if osrelease != "14.04" %}
+        - require_in:
+            - file: uwsgi-loris.log # builder-base-formula/salt/elife/uwsgi.sls
+{% endif %}
 
 loris-images-folder:
     file.directory:
