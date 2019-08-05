@@ -1,1 +1,1 @@
-elifeFormula('iiif', '', null, ['s1604', 's1804'])
+elifeFormula('iiif')

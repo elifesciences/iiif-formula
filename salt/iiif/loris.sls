@@ -81,6 +81,10 @@ loris-user:
         - name: loris
         - shell: /sbin/false
         - home: /home/loris
+        - require_in:
+            # see 'uwsgi' in pillar data and the builder-base-formula 'uwsgi.sls'
+            # this is: uwsgi-(service-name).log
+            - file: uwsgi-loris.log
 
 loris-images-folder:
     file.directory:
