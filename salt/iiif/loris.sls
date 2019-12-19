@@ -236,6 +236,12 @@ loris-uwsgi-ready:
             - loris-config
             - loris-wsgi-entry-point
 
+# we use HSTS for the redirection, if any
+# we typically have port 80 closed externally and allow unencrypted internally
+loris-unencrypted-redirect:
+    file.absent:
+        - name: /etc/nginx/sites-enabled/unencrypted-redirect.conf
+
 loris-nginx-ready:
     file.managed:
         - name: /etc/nginx/sites-enabled/loris.conf
@@ -243,6 +249,7 @@ loris-nginx-ready:
         - template: jinja
         - require:
             - loris-uwsgi-ready
+            - loris-unencrypted-redirect
 
 # TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-end:
