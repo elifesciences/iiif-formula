@@ -236,6 +236,7 @@ loris-uwsgi-ready:
             - loris-config
             - loris-wsgi-entry-point
 
+# temporary state: remove after file is absent
 # we use HSTS for the redirection, if any
 # we typically have port 80 closed externally and allow unencrypted internally
 loris-unencrypted-redirect:
