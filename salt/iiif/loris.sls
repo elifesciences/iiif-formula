@@ -1,18 +1,19 @@
-{% set osrelease = salt['grains.get']('osrelease') %}
 
-# lsh 2019-03-19: what problem is this trying to solve?
 # TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-start:
     cmd.run:
         - name: /etc/init.d/nginx stop
         - require:
             - nginx-server-service
-        
+
 loris-repository:
     git.latest:
         # read-only fork to cherry pick bugfixes
-        - name: git@github.com:elifesciences/loris.git
-        - rev: {{ salt['elife.rev'](default_branch='approved') }}
+        - name: git@github.com:loris-imageserver/loris
+
+        # the travis-ci file at this revision supports python 3.5 and 3.6
+        - rev: {{ salt['elife.rev'](default_branch='v2.3.3') }}
+
         # fixed revision with tested code
         #- rev: approved
         # main branch as of 2017-02-20
@@ -21,6 +22,7 @@ loris-repository:
         - force_fetch: True
         - force_checkout: True
         - force_reset: True
+        #- sync_tags: False # I'm getting a warning about not being able to remove a tag ...?
         - target: /opt/loris
 
     file.directory:
@@ -33,10 +35,21 @@ loris-repository:
         - require:
             - git: loris-repository
 
-    virtualenv.managed:
-        - name: /opt/loris/venv
+    # `virtualenv.managed` doesn't seem to rebuilding when python version changes
+    #virtualenv.managed:
+    #    - name: /opt/loris/venv
+    #    - user: {{ pillar.elife.deploy_user.username }}
+    #    - python: /usr/bin/python2.7
+
+    # rebuild the virtualenv if python3 not found
+    cmd.run:
+        - cwd: /opt/loris
         - user: {{ pillar.elife.deploy_user.username }}
-        - python: /usr/bin/python2.7
+        - name: rm -rf venv/; python3 -m venv venv
+        - unless:
+            - test -e venv/bin/python3
+        - require:
+            - file: loris-repository
 
 loris-dependencies:
     pkg.installed:
@@ -46,13 +59,6 @@ loris-dependencies:
             - libfreetype6
             - libfreetype6-dev
             - zlib1g-dev
-            {% if osrelease == "14.04" %}
-            - liblcms
-            - liblcms-dev
-            - liblcms-utils
-            - libtiff4-dev
-            {% endif %}
-
             - liblcms2-2 
             - liblcms2-dev 
             - liblcms2-utils
@@ -75,7 +81,6 @@ loris-dependencies:
             - loris-repository
             - pkg: loris-dependencies
 
-# lsh 2019-03-19: why a special 'loris' user and not www-data?
 loris-user:
     user.present: 
         - name: loris
@@ -167,13 +172,9 @@ loris-wsgi-entry-point:
 
 loris-uwsgi-configuration:
     file.managed:
-        {% if osrelease == "14.04" %}
-        - name: /etc/loris2/uwsgi.ini
-        {% else %}
         # systemd service file expects to find uwsgi.ini in app folder
         # see builder-base.uwsgi
         - name: /opt/loris/uwsgi.ini
-        {% endif %}
         - source: salt://iiif/config/etc-loris2-uwsgi.ini
         - template: jinja
         - require:
@@ -181,20 +182,11 @@ loris-uwsgi-configuration:
 
 # deprecated, systemd managed uwsgi will write to /var/log/uwsgi-loris.log
 loris-uwsgi-log:
-{% if osrelease == "14.04" %}
-    file.managed:
-        - name: /var/log/uwsgi-loris.log
-        # don't want to lose any write to this
-        - user: loris
-        - group: loris
-        - mode: 664
-{% else %}
     # handled by state "uwsgi-$name.log" in "elife.uwsgi"
     file.exists:
         - name: /var/log/uwsgi-loris.log
         - require:
             - uwsgi-loris.log
-{% endif %}
 
 loris-application-log-directory:
     file.directory:
@@ -211,13 +203,11 @@ loris-uwsgi-upstart:
         - source: salt://iiif/config/etc-init-uwsgi-loris.conf
         - template: jinja
 
-{% if osrelease != "14.04" %}
 uwsgi-loris.socket:
     service.running:
         - enable: True
         - require_in:
             - service: loris-uwsgi-ready
-{% endif %}
 
 loris-uwsgi-ready:
     service.running:

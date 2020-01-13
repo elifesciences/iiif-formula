@@ -1,6 +1,10 @@
-#!/usr/bin/env python
-import site;
-site.addsitedir('/opt/loris/venv/lib/python2.7/site-packages')
+#!/usr/bin/env python3
+
+# I don't think this is necessary
+# see /etc/loris2/uwsgi.ini
+#import site;
+#site.addsitedir('/opt/loris/venv/lib/python3.6/site-packages')
+
 import newrelic.agent
 from loris.webapp import create_app
 
