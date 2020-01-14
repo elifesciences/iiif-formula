@@ -11,7 +11,7 @@ loris-repo-switch:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: |
             # rename 'develop' to 'development' before proceeding
-            git branch -m develop development || echo "branch 'develop' not found"
+            cd /opt/loris && git branch -m develop development || echo "branch 'develop' not found"
 
         # don't run command if the repo doesn't even exist yet
         - onlyif: test -d /opt/loris
