@@ -8,7 +8,6 @@ maintenance-mode-start:
 
 loris-repo-switch:
     cmd.run:
-        - user: {{ pillar.elife.deploy_user.username }}
         - name: |
             cd /opt
             mv loris loris.py2-bak
