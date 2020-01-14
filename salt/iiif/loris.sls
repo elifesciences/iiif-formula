@@ -12,7 +12,8 @@ loris-repository:
         - name: git@github.com:loris-imageserver/loris
 
         # the travis-ci file at this revision supports python 3.5 and 3.6
-        - rev: {{ salt['elife.rev'](default_branch='v2.3.3') }}
+        #- rev: {{ salt['elife.rev'](default_branch='v2.3.3') }}
+        - rev: v2.3.3 # ci is using 'master', which doesn't exist
 
         # fixed revision with tested code
         #- rev: approved
