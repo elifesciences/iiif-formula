@@ -6,6 +6,25 @@ maintenance-mode-start:
         - require:
             - nginx-server-service
 
+loris-repo-switch:
+    cmd.run:
+        - cwd: /opt/loris
+        - user: {{ pillar.elife.deploy_user.username }}
+        - name: |
+            set -e
+            git remote set-url origin git@github.com:loris-imageserver/loris
+            git fetch
+            # we have a develop, they have a developMENT
+            # this causes issues with whatever salt is doing
+            git checkout development
+            touch .switched-origin.flag
+
+        # don't run command if we've already switched
+        - creates: .switched-origin.flag
+
+        # don't run command if the repo doesn't even exist yet
+        - only_if: test -d /opt/loris
+
 loris-repository:
     git.latest:
         # read-only fork to cherry pick bugfixes
@@ -25,6 +44,8 @@ loris-repository:
         - force_reset: True
         #- sync_tags: False # I'm getting a warning about not being able to remove a tag ...?
         - target: /opt/loris
+        - require:
+            - loris-repo-switch
 
     file.directory:
         - name: /opt/loris
