@@ -10,17 +10,8 @@ loris-repo-switch:
     cmd.run:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: |
-            set -e
-            cd /opt/loris
-            git remote set-url origin git@github.com:loris-imageserver/loris
-            git fetch
-            # we have a develop, they have a developMENT
-            # this causes issues with whatever salt is doing
-            git checkout development
-            touch .switched-origin.flag
-
-        # don't run command if we've already switched
-        - creates: .switched-origin.flag
+            # rename 'develop' to 'development' before proceeding
+            git branch -m develop development || echo "branch 'develop' not found"
 
         # don't run command if the repo doesn't even exist yet
         - onlyif: test -d /opt/loris
