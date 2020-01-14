@@ -8,10 +8,10 @@ maintenance-mode-start:
 
 loris-repo-switch:
     cmd.run:
-        - cwd: /opt/loris
         - user: {{ pillar.elife.deploy_user.username }}
         - name: |
             set -e
+            cd /opt/loris
             git remote set-url origin git@github.com:loris-imageserver/loris
             git fetch
             # we have a develop, they have a developMENT
@@ -23,7 +23,7 @@ loris-repo-switch:
         - creates: .switched-origin.flag
 
         # don't run command if the repo doesn't even exist yet
-        - only_if: test -d /opt/loris
+        - onlyif: test -d /opt/loris
 
 loris-repository:
     git.latest:
