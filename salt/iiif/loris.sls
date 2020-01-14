@@ -10,11 +10,11 @@ loris-repo-switch:
     cmd.run:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: |
-            # rename 'develop' to 'development' before proceeding
-            cd /opt/loris && git branch -m develop development || echo "branch 'develop' not found"
+            cd /opt
+            mv loris loris.py2-bak
 
-        # don't run command if the repo doesn't even exist yet
-        - onlyif: test -d /opt/loris
+        # don't run command if the backup already exists
+        - unless: test -d /opt/loris.py2-bak
 
 loris-repository:
     git.latest:
