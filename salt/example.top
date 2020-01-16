@@ -2,9 +2,9 @@ base:
     '*':
         - elife
         - elife.nginx
-        - elife.uwsgi
+        #- elife.uwsgi
         - elife.external-volume
         # only does something on EC2
         - elife.newrelic-python
         - iiif
-        - iiif.loris
+        #- iiif.loris
