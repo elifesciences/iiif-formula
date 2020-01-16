@@ -39,6 +39,7 @@ loris-wsgi-entry-point:
         - require:
             - loris-repository
 
+# TODO: these are accumulating
 build-loris:    
     docker_image.present:
         - name: elifesciences/loris
@@ -50,3 +51,13 @@ build-loris:
             - loris-config
             - loris-uwsgi-config
             - loris-wsgi-entry-point
+
+run-loris:
+    docker_container.running:
+        - name: loris--{{ pillar.elife.env }}
+        - image: elifesciences/loris
+        - auto_remove: True # False?
+        - ports:
+            - 5004 # uwsgi
+        #- volumes:
+        #
