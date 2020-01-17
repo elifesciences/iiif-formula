@@ -1,9 +1,10 @@
 # neccessary for docker_* states
 # this is like the python mysql library for mysql_* Salt states
 docker-py:
-    cmd.run:
-        - name: python3 -m pip install docker==4.1.0
+    pip.installed:
+        - name: docker==4.1.0
 
+# todo: temporary. remove once image in repo
 loris-docker-repo:
     git.latest:
         - name: https://github.com/elifesciences/loris-docker
@@ -13,6 +14,64 @@ loris-docker-repo:
         - force_checkout: True
         - force_reset: True
         - target: /opt/loris-docker
+
+# should match the id of the user in the container
+# TODO: stick into pillar
+{% set loris_user_id = 1005 %}
+
+loris-user:
+    user.present: 
+        - name: loris
+        - uid: {{ loris_user_id }}
+        - shell: /sbin/false
+        - home: /nonexistent
+        - createhome: False
+
+# directories the container will have mounted
+
+loris-tmp-directory:
+    file.directory:
+        - name: {{ pillar.iiif.loris.storage }}/tmp
+        - user: loris
+        - group: loris
+        - dir_mode: 755
+        - makedirs: True
+        - require:
+            - loris-user
+            - mount-external-volume
+
+loris-cache-general:
+    file.directory:
+        - name: {{ pillar.iiif.loris.storage }}/cache-general
+        - user: loris
+        - group: loris
+        - dir_mode: 755
+        - makedirs: True
+        - require:
+            - loris-user
+            - mount-external-volume
+
+loris-cache-resolver:
+    file.directory:
+        - name: {{ pillar.iiif.loris.storage }}/cache-resolver
+        - user: loris
+        - group: loris
+        - require:
+            - loris-user
+            - mount-external-volume
+
+# empty folder that can be synced over the caches to clean them
+loris-cache-blank:
+    file.directory:
+        - name: {{ pillar.iiif.loris.storage }}/blank
+        - user: loris
+        - group: loris
+        - dir_mode: 755
+        - makedirs: True
+        - require:
+            - loris-user
+            - mount-external-volume
+
 
 # loris is built using the *default* loris config in the `loris-docker` repo.
 # those default config files are overridden below when the *formula* loris config
@@ -25,31 +84,42 @@ get-loris:
         - tag: latest
         - require:
             - loris-docker-repo
+        # build image if repo changes
+        # TODO: remove once we're pulling image from docker directly
+        - watch:
+            - loris-docker-repo
+
+# Docker needs to bind certain configuration files between host and container
+# this is where you put them
+loris-dir:
+    file.directory:
+        - name: /opt/loris
 
 loris-config:
     file.managed:
-        - name: /opt/loris-docker/loris2.conf
+        - name: /opt/loris/loris2.conf
         - source: salt://iiif/config/etc-loris2-loris2.conf
         - template: jinja
+        - makedirs: True
         - require:
-            - get-loris
+            - loris-dir
 
 loris-uwsgi-config:
     file.managed:
         # systemd service file expects to find uwsgi.ini in app folder
         # see builder-base.uwsgi
-        - name: /opt/loris-docker/uwsgi.ini
+        - name: /opt/loris/uwsgi.ini
         - source: salt://iiif/config/etc-loris2-uwsgi.ini
         - template: jinja
         - require:
-            - get-loris
+            - loris-dir
 
 loris-wsgi-entry-point:
     file.managed:
-        - name: /opt/loris-docker/loris2.wsgi
+        - name: /opt/loris/loris2.wsgi
         - source: salt://iiif/config/var-www-loris2-loris2.wsgi
         - require:
-            - get-loris
+            - loris-dir
 
 run-loris:
     docker_container.running:
@@ -59,13 +129,24 @@ run-loris:
         - port_bindings:
             - 5004:5004 # uwsgi
         - binds:
-            - /opt/loris-docker/loris2.conf:/opt/loris/etc/loris2.conf
-            - /opt/loris-docker/loris2.wsgi:/var/www/loris2/loris2.wsgi
-            - /opt/loris-docker/uwsgi.ini:/etc/loris2/uwsgi.ini
+            # rendered config
+            - /opt/loris/loris2.conf:/opt/loris/etc/loris2.conf
+            - /opt/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
+            - /opt/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
+            # directories
+            # these paths are specified in `loris2.conf`
+            - {{ pillar.iiif.loris.storage }}/cache-resolver:/usr/local/share/images/loris
+            - {{ pillar.iiif.loris.storage }}/cache-general:/var/cache/loris
         - require:
             - docker-py
             - get-loris
-            - loris-docker-repo
+
+            - loris-cache-resolver
+            - loris-cache-general
+            - loris-tmp-directory
+            - loris-cache-blank
+
+            - loris-docker-repo # temp
             - loris-config
             - loris-uwsgi-config
             - loris-wsgi-entry-point
