@@ -2,6 +2,7 @@ base:
     '*':
         - elife
         - elife.nginx
+        - elife.docker
         #- elife.uwsgi
         - elife.external-volume
         # only does something on EC2
