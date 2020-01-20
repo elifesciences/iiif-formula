@@ -1,9 +1,3 @@
-# neccessary for docker_* states
-# this is like the python mysql library for mysql_* Salt states
-docker-py:
-    pip.installed:
-        - name: docker==4.1.0
-
 # todo: temporary. remove once image in repo
 loris-docker-repo:
     git.latest:
@@ -138,7 +132,6 @@ run-loris:
             - {{ pillar.iiif.loris.storage }}/cache-resolver:/usr/local/share/images/loris
             - {{ pillar.iiif.loris.storage }}/cache-general:/var/cache/loris
         - require:
-            - docker-py
             - get-loris
 
             - loris-cache-resolver
