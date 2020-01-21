@@ -127,10 +127,12 @@ run-loris:
             - /opt/loris/loris2.conf:/opt/loris/etc/loris2.conf
             - /opt/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
             - /opt/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
-            # directories
+            # directories (host:container)
             # these paths are specified in `loris2.conf`
+            - {{ pillar.iiif.loris.storage }}/tmp:/tmp/loris2/tmp
             - {{ pillar.iiif.loris.storage }}/cache-resolver:/usr/local/share/images/loris
             - {{ pillar.iiif.loris.storage }}/cache-general:/var/cache/loris
+        - log_driver: syslog # previously /var/log/uwsgi.log
         - require:
             - get-loris
 
@@ -151,7 +153,26 @@ loris-nginx-ready:
         - template: jinja
         - require:
             - run-loris
-        # restart nginx (later) if web config has changed
-        - listen_in:
+        # restart nginx if web config has changed
+        - watch_in:
             - service: nginx-server-service
+
+loris-ready:
+    file.managed:
+        - name: /usr/local/bin/loris-smoke
+        - source: salt://iiif/config/usr-local-bin-loris-smoke
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-nginx-ready
+
+    cmd.run:
+        - name: |
+            wait_for_port 80
+            loris-smoke
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - file: loris-ready
+
+
 

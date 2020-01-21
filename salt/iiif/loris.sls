@@ -86,6 +86,8 @@ loris-user:
             # this is: uwsgi-(service-name).log
             - file: uwsgi-loris.log
 
+# lsh 2020-01-21: is this doing anything? it's empty in production. 
+# possibly a leftover. see `pillar.iiif.loris.storage`
 loris-images-folder:
     file.directory:
         - name: /usr/local/share/images
