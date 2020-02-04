@@ -1,13 +1,6 @@
-# todo: temporary. remove once image in repo
-loris-docker-repo:
-    git.latest:
-        - name: https://github.com/elifesciences/loris-docker
-        - rev: elife
-        - branch: elife
-        - force_fetch: True
-        - force_checkout: True
-        - force_reset: True
-        - target: /opt/loris-docker
+get-loris:
+    docker_image.present:
+        - name: elifesciences/loris:latest
 
 # should match the id of the user in the container
 # TODO: stick into pillar
@@ -50,6 +43,7 @@ loris-cache-resolver:
         - name: {{ pillar.iiif.loris.storage }}/cache-resolver
         - user: loris
         - group: loris
+        - makedirs: True
         - require:
             - loris-user
             - mount-external-volume
@@ -66,22 +60,6 @@ loris-cache-blank:
             - loris-user
             - mount-external-volume
 
-
-# loris is built using the *default* loris config in the `loris-docker` repo.
-# those default config files are overridden below when the *formula* loris config
-# files are mounted/bound just before running image.
-# TODO: don't build here, just pull from repo
-get-loris:
-    docker_image.present:
-        - name: elifesciences/loris
-        - build: /opt/loris-docker/
-        - tag: latest
-        - require:
-            - loris-docker-repo
-        # build image if repo changes
-        # TODO: remove once we're pulling image from docker directly
-        - watch:
-            - loris-docker-repo
 
 # Docker needs to bind certain configuration files between host and container
 # this is where you put them
@@ -141,7 +119,6 @@ run-loris:
             - loris-tmp-directory
             - loris-cache-blank
 
-            - loris-docker-repo # temp
             - loris-config
             - loris-uwsgi-config
             - loris-wsgi-entry-point
