@@ -1,6 +1,8 @@
 get-loris:
     docker_image.present:
         - name: elifesciences/loris:latest
+        - require:
+            - docker-ready
 
 # should match the id of the user in the container
 # TODO: stick into pillar
