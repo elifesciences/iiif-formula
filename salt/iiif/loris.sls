@@ -70,7 +70,7 @@ loris-dependencies:
             venv/bin/pip install uwsgi==2.0.17.1
             NEW_RELIC_EXTENSIONS=false venv/bin/pip install --no-binary :all: newrelic==2.86.0.65
         - cwd: /opt/loris
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - loris-repository
             - pkg: loris-dependencies
@@ -95,7 +95,7 @@ loris-setup:
     cmd.run:
         - name: |
             venv/bin/python setup.py install
-        - user: root
+        - runas: root
         - cwd: /opt/loris
         - require:
             - loris-dependencies
@@ -279,7 +279,7 @@ loris-ready:
         - name: |
             wait_for_port 80
             loris-smoke
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - file: loris-ready
 
