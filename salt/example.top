@@ -6,6 +6,6 @@ base:
         #- elife.uwsgi
         - elife.external-volume
         # only does something on EC2
-        - elife.newrelic-python
+        #- elife.newrelic-python # 2020-03: disabled
         - iiif
-        #- iiif.loris
+        #- iiif.loris # 2020-03: disabled in favour of init.sls
