@@ -107,6 +107,7 @@ run-loris:
             - /opt/loris/loris2.conf:/opt/loris/etc/loris2.conf
             - /opt/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
             - /opt/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
+            - /opt/loris/newrelic.ini:/etc/newrelic.ini
             # directories (host:container)
             # these paths are specified in `loris2.conf`
             - {{ pillar.iiif.loris.storage }}/tmp:/tmp/loris2/tmp
