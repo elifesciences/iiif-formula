@@ -67,10 +67,12 @@ loris-cache-blank:
 # this is where you put them
 loris-dir:
     file.directory:
+        - user: {{ pillar.elife.deploy_user.username }}
         - name: /opt/loris
 
 loris-config:
     file.managed:
+        - user: {{ pillar.elife.deploy_user.username }}
         - name: /opt/loris/loris2.conf
         - source: salt://iiif/config/etc-loris2-loris2.conf
         - template: jinja
@@ -82,6 +84,7 @@ loris-config:
 loris-newrelic-venv:
     cmd.run:
         - cwd: /opt/loris
+        - runas: {{ pillar.elife.deploy_user.username }}
         - name: |
             python3 -m venv venv
             venv/bin/pip install newrelic==5.8.0.136
