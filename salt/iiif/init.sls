@@ -91,15 +91,21 @@ loris-newrelic-venv:
         - unless:
             - test -d /opt/loris/venv
             
+# required by newrelic-python.sls because it's using builder-private and not the formula's pillar
+# remove once builder-private changes are in and the service is removed
+loris-uwsgi-ready:
+    service.enabled:
+        - name: nginx # could be anything that should be enabled by default
 
 # required by newrelic-python.sls because it's using builder-private and not the formula's pillar
-# removed once builder-private changes are in
+# remove once builder-private changes are in
 loris-setup:
     cmd.run:
         - name: "echo dummy state"
         - require:
             - loris-config
             - loris-newrelic-venv
+            - loris-uwsgi-ready
 
 
 # newrelic-python runs about here
