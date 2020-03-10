@@ -100,6 +100,8 @@ run-loris:
         - name: loris--{{ pillar.elife.env }} # loris--dev, loris--prod
         - image: elifesciences/loris
         - auto_remove: True # False?
+        - environment:
+            - NEW_RELIC_ENABLED: {{ pillar.elife.newrelic.enabled }}
         - port_bindings:
             - 5004:5004 # uwsgi
         - binds:
