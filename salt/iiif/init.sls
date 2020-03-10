@@ -94,7 +94,7 @@ loris-newrelic-venv:
 # required by newrelic-python.sls because it's using builder-private and not the formula's pillar
 # remove once builder-private changes are in and the service is removed
 loris-uwsgi-ready:
-    service.enabled:
+    service.running:
         - name: nginx # could be anything that should be enabled by default
 
 # required by newrelic-python.sls because it's using builder-private and not the formula's pillar
