@@ -87,6 +87,7 @@ loris-newrelic-venv:
             venv/bin/pip install newrelic==5.8.0.136
         - unless:
             - test -d /opt/loris/venv
+            
 
 # required by newrelic-python.sls because it's using builder-private and not the formula's pillar
 # removed once builder-private changes are in
@@ -144,6 +145,7 @@ run-loris:
             - loris-cache-blank
 
             - loris-config
+            - loris-newrelic-venv
             - loris-uwsgi-config
             - loris-wsgi-entry-point
 
