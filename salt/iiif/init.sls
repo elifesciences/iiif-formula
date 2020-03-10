@@ -98,6 +98,10 @@ loris-setup:
             - loris-config
             - loris-newrelic-venv
 
+
+# newrelic-python runs about here
+
+
 loris-uwsgi-config:
     file.managed:
         # systemd service file expects to find uwsgi.ini in app folder
@@ -148,6 +152,13 @@ run-loris:
             - loris-newrelic-venv
             - loris-uwsgi-config
             - loris-wsgi-entry-point
+
+            {% if pillar.elife.newrelic.enabled %}
+            # ensure newrelic-python has finished before we try running loris
+            # if it's run beforehand then the directory /opt/loris/newrelic.ini is created :(
+            - newrelic-python-logfile-agent-in-ini-configuration
+            {% endif %}
+
 
 loris-nginx-ready:
     file.managed:
