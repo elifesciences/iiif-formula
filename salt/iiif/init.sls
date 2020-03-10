@@ -78,6 +78,14 @@ loris-config:
         - require:
             - loris-dir
 
+# required by CI because it's using builder-private and not the formula's pillar
+# removed once builder-private changes are in
+loris-setup:
+    cmd.run:
+        - name: "echo dummy state"
+        - require:
+            - loris-config
+
 loris-uwsgi-config:
     file.managed:
         # systemd service file expects to find uwsgi.ini in app folder
