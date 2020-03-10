@@ -78,13 +78,24 @@ loris-config:
         - require:
             - loris-dir
 
-# required by CI because it's using builder-private and not the formula's pillar
+# required by newrelic-python.sls
+loris-newrelic-venv:
+    cmd.run:
+        - cwd: /opt/loris
+        - name: |
+            python3 -m venv venv
+            venv/bin/pip install newrelic==5.8.0.136
+        - unless:
+            - test -d /opt/loris/venv
+
+# required by newrelic-python.sls because it's using builder-private and not the formula's pillar
 # removed once builder-private changes are in
 loris-setup:
     cmd.run:
         - name: "echo dummy state"
         - require:
             - loris-config
+            - loris-newrelic-venv
 
 loris-uwsgi-config:
     file.managed:
