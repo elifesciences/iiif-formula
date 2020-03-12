@@ -7,7 +7,7 @@ maintenance-mode-start:
         - name: /etc/init.d/nginx stop
         - require:
             - nginx-server-service
-        
+
 loris-repository:
     git.latest:
         # read-only fork to cherry pick bugfixes
@@ -210,6 +210,8 @@ loris-uwsgi-upstart:
         - name: /etc/init/uwsgi-loris.conf
         - source: salt://iiif/config/etc-init-uwsgi-loris.conf
         - template: jinja
+        # lsh@2020-03: /etc/init doesn't exist any more in some cases
+        - makedirs: True
 
 {% if osrelease != "14.04" %}
 uwsgi-loris.socket:
