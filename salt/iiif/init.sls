@@ -11,9 +11,9 @@ get-loris:
 loris-user:
     user.present: 
         - name: loris
-        - uid: {{ loris_user_id }}
+        #- uid: {{ loris_user_id }} # on vagrant this is 1003, everywhere else it's 1002
         - shell: /sbin/false
-        - home: /nonexistent
+        - home: /home/loris
         - createhome: False
 
 # directories the container will have mounted
