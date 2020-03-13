@@ -3,7 +3,7 @@ base:
         - elife
         - elife.nginx
         - elife.docker
-        #- elife.uwsgi
+        #- elife.uwsgi # 2020-03: disabled in favour of init.sls and containers. uwsgi now runs inside container.
         - elife.external-volume
         # only does something on EC2
         - elife.newrelic-python

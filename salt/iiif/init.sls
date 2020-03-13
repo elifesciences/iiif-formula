@@ -116,7 +116,7 @@ loris-uwsgi-config:
         # systemd service file expects to find uwsgi.ini in app folder
         # see builder-base.uwsgi
         - name: /opt/loris/uwsgi.ini
-        - source: salt://iiif/config/etc-loris2-uwsgi.ini
+        - source: salt://iiif/config/opt-loris-uwsgi.ini
         - template: jinja
         - require:
             - loris-dir
@@ -124,15 +124,18 @@ loris-uwsgi-config:
 loris-wsgi-entry-point:
     file.managed:
         - name: /opt/loris/loris2.wsgi
-        - source: salt://iiif/config/var-www-loris2-loris2.wsgi
+        - source: salt://iiif/config/opt-loris-loris2.wsgi
         - require:
             - loris-dir
+
+# `docker_container.running` state:
+# - https://docs.saltstack.com/en/latest/ref/states/all/salt.states.docker_container.html#salt.states.docker_container.running
 
 run-loris:
     docker_container.running:
         - name: loris--{{ pillar.elife.env }} # loris--dev, loris--prod
         - image: elifesciences/loris
-        - auto_remove: True # False?
+        - auto_remove: True # "Enable auto-removal of the container on daemon side when the container’s process exits"
         - environment:
             - NEW_RELIC_ENABLED: {{ pillar.elife.newrelic.enabled }}
         - port_bindings:
