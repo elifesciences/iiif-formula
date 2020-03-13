@@ -1,6 +1,9 @@
 #!/bin/bash
+# adapted from: https://github.com/loris-imageserver/loris/blob/development/bin/loris-http_cache_clean.sh
+# called by /usr/local/bin/loris-cache-clean
+# run as root
+
 set -e
-# adapted from https://github.com/loris-imageserver/loris/blob/development/bin/loris-http_cache_clean.sh
 
 if [ "$#" -lt 1 ]; then
     echo "Usage: loris-cache-clean-soft SOFT_MAX_SIZE_KILOBYTES"
@@ -8,11 +11,8 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-LOG="/var/log/loris2/cache_clean.log"
-
 log_message () {
-    echo -ne "$(date +[%c]) [loris-cache-clean-soft] " >> "$LOG"
-    echo "$1" >> "$LOG"
+    logger "$1" --tag "loris-cache-clean-soft"
 }
 
 log_message "Started loris-cache-clean-soft (arguments $1)"
@@ -36,6 +36,7 @@ REDUCE_TO="$1"
 # executions of this script.
 
 current_usage_cache_root () {
+    # -k like --block-size=1K
     df -k {{ pillar.iiif.loris.storage }} --output=used | sed 1d
 }
 
@@ -64,27 +65,28 @@ while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
 
     # empty directories
     # deleting those is in race condition with:
+    #
     # Traceback (most recent call last):
     # File "/opt/loris/loris/webapp.py", line 395, in __call__
-    # return self.wsgi_app(environ, start_response)
+    #   return self.wsgi_app(environ, start_response)
     # File "/opt/loris/loris/webapp.py", line 346, in wsgi_app
-    # response = self.route(request)
+    #   response = self.route(request)
     # File "/opt/loris/loris/webapp.py", line 389, in route
-    # return self.get_img(request, ident, region, size, rotation, quality, fmt, base_ur
-    # i)
+    #   return self.get_img(request, ident, region, size, rotation, quality, fmt, base_uri)
     # File "/opt/loris/loris/webapp.py", line 552, in get_img
-    # src_fp, src_format = self.resolver.resolve(ident)
+    #   src_fp, src_format = self.resolver.resolve(ident)
     # File "/opt/loris/loris/resolver.py", line 350, in resolve
-    # cached_file_path = self.copy_to_cache(ident)
+    #   cached_file_path = self.copy_to_cache(ident)
     # File "/opt/loris/loris/resolver.py", line 331, in copy_to_cache
-    # with tempfile.NamedTemporaryFile(dir=cache_dir, delete=False) as tmp_file:
+    #   with tempfile.NamedTemporaryFile(dir=cache_dir, delete=False) as tmp_file:
     # File "/usr/lib/python2.7/tempfile.py", line 475, in NamedTemporaryFile
-    # (fd, name) = _mkstemp_inner(dir, prefix, suffix, flags)
+    #   (fd, name) = _mkstemp_inner(dir, prefix, suffix, flags)
     # File "/usr/lib/python2.7/tempfile.py", line 244, in _mkstemp_inner
-    # fd = _os.open(file, flags, 0600)
+    #   fd = _os.open(file, flags, 0600)
     # OSError: [Errno 2] No such file or directory: '/ext/loris/cache-resolver/lax/5e/aec/e8f/6e4/548/522/137/903/6f4/4d4/68d/tmpIMyGPB'
     #
     # BUT we turn off the daemon before doing it
+    # lsh@2020-03: We turn off *nginx* before doing it. Might it be possible work is still being completed?
     log_message "Deleting $IMG_CACHE_ROOT_DIR empty directories"
 	find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
     log_message "Deleting $IMG_CACHE_DP_DIR empty directories"
