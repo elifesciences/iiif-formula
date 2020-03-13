@@ -75,12 +75,12 @@ loris-dependencies:
             - loris-repository
             - pkg: loris-dependencies
 
-# lsh 2019-03-19: why a special 'loris' user and not www-data?
 loris-user:
     user.present: 
         - name: loris
         - shell: /sbin/false
         - home: /home/loris
+        - uid: 1002
         - require_in:
             # see 'uwsgi' in pillar data and the builder-base-formula 'uwsgi.sls'
             # this is: uwsgi-(service-name).log
