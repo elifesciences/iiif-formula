@@ -136,6 +136,7 @@ run-loris:
         - name: loris--{{ pillar.elife.env }} # loris--dev, loris--prod
         - image: elifesciences/loris
         - auto_remove: True # "Enable auto-removal of the container on daemon side when the container’s process exits"
+        - hostname: {{ salt['elife.cfg']('project.full_hostname') }} # prod--iiif.elifesciences.org
         - environment:
             - NEW_RELIC_ENABLED: {{ pillar.elife.newrelic.enabled }}
         - port_bindings:
@@ -151,6 +152,8 @@ run-loris:
             - {{ pillar.iiif.loris.storage }}/tmp:/tmp/loris2/tmp
             - {{ pillar.iiif.loris.storage }}/cache-resolver:/usr/local/share/images/loris
             - {{ pillar.iiif.loris.storage }}/cache-general:/var/cache/loris
+            # test directory with a filesystem (fs) resolver
+            - {{ pillar.iiif.loris.storage }}/test:/usr/local/share/images/loris-test
         - log_driver: syslog # previously /var/log/uwsgi.log
         - require:
             - get-loris
