@@ -74,7 +74,7 @@ loris-config:
     file.managed:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: /opt/loris/loris2.conf
-        - source: salt://iiif/config/etc-loris2-loris2.conf
+        - source: salt://iiif/config/opt-loris-loris2.conf
         - template: jinja
         - makedirs: True
         - require:
@@ -141,7 +141,7 @@ run-loris:
         - port_bindings:
             - 5004:5004 # uwsgi
         - binds:
-            # rendered config
+            # salt-rendered config
             - /opt/loris/loris2.conf:/opt/loris/etc/loris2.conf
             - /opt/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
             - /opt/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
