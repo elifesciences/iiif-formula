@@ -7,8 +7,6 @@ loris-cache-clean-soft:
         - source: salt://iiif/config/usr-local-bin-loris-cache-clean-soft
         - template: jinja
         - mode: 755
-        - require:
-            - loris-ready
 
 loris-cache-clean-hard:
     file.managed:
@@ -16,8 +14,6 @@ loris-cache-clean-hard:
         - source: salt://iiif/config/usr-local-bin-loris-cache-clean-hard
         - template: jinja
         - mode: 755
-        - require:
-            - loris-ready
 
 loris-cache-clean-hard-deprecated:
     file.absent:
