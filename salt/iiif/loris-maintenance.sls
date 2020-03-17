@@ -1,6 +1,4 @@
 
-# TODO: optimize with unless
-
 loris-cache-clean-soft:
     file.managed:
         - name: /usr/local/bin/loris-cache-clean-soft

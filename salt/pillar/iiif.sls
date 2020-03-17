@@ -28,11 +28,3 @@ elife:
         # deliberately empty so newrelic-python.sls won't restart anything
         service:
         dependency_state: loris-config
-
-    # 2020-03: disabled. uwsgi now runs within container and is bridged by nginx
-    # 16.04+ systemd managed uwsgi
-    #uwsgi:
-    #    username: loris
-    #    services:
-    #        loris:
-    #            folder: /opt/loris
