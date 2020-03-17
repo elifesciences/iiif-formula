@@ -4,25 +4,26 @@ get-loris:
         - require:
             - docker-ready
 
-# should match the id of the user in the container
-# TODO: stick into pillar
-{% set loris_user_id = 1005 %}
+
+# loris user is deprecated in favour of www-data
+
+{% set loris_user = pillar.elife.webserver.username %}
 
 loris-user:
     user.present: 
-        - name: loris
-        #- uid: {{ loris_user_id }} # on vagrant this is 1003, everywhere else it's 1002
-        - shell: /sbin/false
-        - home: /home/loris
-        - createhome: False
+        - name: {{ loris_user }}
+        #- uid: ... # on vagrant this is 1003, everywhere else it's 1002. www-data is 33 everywhere though
+        #- shell: /sbin/false
+        #- home: /home/loris
+        #- createhome: False
 
 # directories the container will have mounted
 
 loris-tmp-directory:
     file.directory:
         - name: {{ pillar.iiif.loris.storage }}/tmp
-        - user: loris
-        - group: loris
+        - user: {{ loris_user }}
+        - group: {{ loris_user }}
         - dir_mode: 755
         - makedirs: True
         - require:
@@ -32,8 +33,8 @@ loris-tmp-directory:
 loris-cache-general:
     file.directory:
         - name: {{ pillar.iiif.loris.storage }}/cache-general
-        - user: loris
-        - group: loris
+        - user: {{ loris_user }}
+        - group: {{ loris_user }}
         - dir_mode: 755
         - makedirs: True
         - require:
@@ -43,8 +44,8 @@ loris-cache-general:
 loris-cache-resolver:
     file.directory:
         - name: {{ pillar.iiif.loris.storage }}/cache-resolver
-        - user: loris
-        - group: loris
+        - user: {{ loris_user }}
+        - group: {{ loris_user }}
         - makedirs: True
         - require:
             - loris-user
@@ -54,8 +55,8 @@ loris-cache-resolver:
 loris-cache-blank:
     file.directory:
         - name: {{ pillar.iiif.loris.storage }}/blank
-        - user: loris
-        - group: loris
+        - user: {{ loris_user }}
+        - group: {{ loris_user }}
         - dir_mode: 755
         - makedirs: True
         - require:
@@ -130,6 +131,20 @@ loris-wsgi-entry-point:
 
 # `docker_container.running` state:
 # - https://docs.saltstack.com/en/latest/ref/states/all/salt.states.docker_container.html#salt.states.docker_container.running
+
+
+{% if pillar.elife.env == "dev" %}
+
+build-loris:
+    docker_image.present:
+        - name: elifesciences/loris
+        - tag: latest
+        - build: /vagrant/loris-docker
+        - force: true
+        - require_in:
+            - docker_container: run-loris
+
+{% endif %}        
 
 run-loris:
     docker_container.running:
