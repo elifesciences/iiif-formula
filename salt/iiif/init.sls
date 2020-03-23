@@ -151,8 +151,8 @@ build-loris:
 # - https://docs.saltstack.com/en/latest/ref/states/all/salt.states.docker_container.html#salt.states.docker_container.running
 run-loris:
     docker_container.running:
-        - name: loris--{{ pillar.elife.env }} # loris--dev, loris--prod
-        - image: elifesciences/loris
+        - name: loris
+        - image: elifesciences/loris:latest
         - auto_remove: True # "Enable auto-removal of the container on daemon side when the container’s process exits"
         - hostname: {{ salt['elife.cfg']('project.full_hostname') }} # prod--iiif.elifesciences.org
         - environment:

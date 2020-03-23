@@ -13,12 +13,6 @@ loris-cache-clean-hard:
         - template: jinja
         - mode: 755
 
-loris-cache-clean-hard-deprecated:
-    file.absent:
-        - name: /usr/local/bin/loris-cache-purge
-        - require:
-            - loris-cache-clean-hard
-
 loris-cache-clean:
     file.managed:
         - name: /usr/local/bin/loris-cache-clean
