@@ -1,3 +1,13 @@
+
+
+
+#
+# 2020-03: loris.sls is being replaced by init.sls 
+# the below is deprecated and will be removed once iiif is running stably in a container
+# 
+
+
+
 {% set osrelease = salt['grains.get']('osrelease') %}
 
 # lsh 2019-03-19: what problem is this trying to solve?

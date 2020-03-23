@@ -1,8 +1,9 @@
 #!/bin/bash
-set -e
-# aggressively deletes the whole cache
+# aggressively deletes the whole cache.
+# called by /usr/local/bin/loris-cache-clean
+# run as root
 
-LOG="/var/log/loris2/cache_clean.log"
+set -e
 
 # rsync... http://www.slashroot.in/which-is-the-fastest-method-to-delete-files-in-linux
 # https://web.archive.org/web/20130929001850/http://linuxnote.net/jianingy/en/linux/a-fast-way-to-remove-huge-number-of-files.html
@@ -11,15 +12,15 @@ IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
 IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
 
 log_message () {
-    echo -ne "$(date +[%c]) [loris-cache-clean-hard] " >> "$LOG"
-    echo "$1" >> "$LOG"
+    logger "$1" --tag "loris-cache-clean-hard"
 }
 
 log_message "Started loris-cache-clean-hard"
 
 log_message "Removing $IMG_CACHE_ROOT_DIR contents"
 rsync -a --delete $BLANK_DIR/ $IMG_CACHE_ROOT_DIR/
+
 log_message "Removing $IMG_CACHE_DP_DIR contents"
 rsync -a --delete $BLANK_DIR/ $IMG_CACHE_DP_DIR/
 
-log_message "Cache completely purged!" 
+log_message "Cache completely purged!"

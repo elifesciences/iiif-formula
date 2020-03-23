@@ -15,6 +15,7 @@ iiif:
         # only work with TemplateHTTPResolver
         templates:
             lax: https://s3.amazonaws.com/prod-elife-published/articles/%s
+            digests: https://s3.amazonaws.com/prod-elife-published/digests/%s
             journal-cms: https://prod--journal-cms.elifesciences.org/sites/default/files/iiif/%s
 
     fallback:
@@ -22,17 +23,8 @@ iiif:
         tif: jpg
         
 elife:
-
-# to enable New Relic APM for the Python application
-# depends on pillar.elife.newrelic in builder-base-formula
-#    newrelic_python:
-#        application_folder: /opt/loris
-#        service: loris-uwsgi-ready
-#        dependency_state: loris-setup
-
-    # 16.04+ systemd managed uwsgi
-    uwsgi:
-        username: loris
-        services:
-            loris:
-                folder: /opt/loris
+    newrelic_python:
+        application_folder: /opt/loris
+        # deliberately empty so newrelic-python.sls won't restart anything
+        service:
+        dependency_state: loris-config
