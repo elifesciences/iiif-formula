@@ -1,0 +1,15 @@
+[Unit]
+Description=iiif container service
+After=docker.service
+Requires=docker.service
+Before=nginx.service
+ 
+[Service]
+TimeoutStartSec=0
+Restart=always
+
+WorkingDirectory=/opt/loris
+ExecStart=/usr/local/bin/docker-compose up
+ 
+[Install]
+WantedBy=multi-user.target

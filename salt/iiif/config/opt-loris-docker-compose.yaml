@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+    uwsgi:
+        image: "elifesciences/loris:latest"
+        hostname: {{ salt['elife.cfg']('project.full_hostname') }} # prod--iiif.elifesciences.org
+        environment:
+            NEW_RELIC_ENABLED: "{{ pillar.elife.newrelic.enabled }}"
+        ports:
+            - "5004:5004" # uwsgi
+        volumes:
+            # salt-rendered config
+            - /opt/loris/loris2.conf:/opt/loris/etc/loris2.conf
+            - /opt/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
+            - /opt/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
+            - /opt/loris/newrelic.ini:/etc/newrelic.ini
+            # directories (host:container)
+            # these paths are specified in `loris2.conf`
+            - {{ pillar.iiif.loris.storage }}/tmp:/tmp/loris2/tmp
+            - {{ pillar.iiif.loris.storage }}/cache-resolver:/usr/local/share/images/loris
+            - {{ pillar.iiif.loris.storage }}/cache-general:/var/cache/loris
+            # test directory with a filesystem (fs) resolver
+            - {{ pillar.iiif.loris.storage }}/test:/usr/local/share/images/loris-test

@@ -147,33 +147,28 @@ build-loris:
 
 {% endif %}        
 
-# `docker_container.running` state:
-# - https://docs.saltstack.com/en/latest/ref/states/all/salt.states.docker_container.html#salt.states.docker_container.running
-run-loris:
-    docker_container.running:
-        - name: loris
-        - image: elifesciences/loris:latest
-        - auto_remove: True # "Enable auto-removal of the container on daemon side when the container’s process exits"
-        - hostname: {{ salt['elife.cfg']('project.full_hostname') }} # prod--iiif.elifesciences.org
-        - environment:
-            - NEW_RELIC_ENABLED: {{ pillar.elife.newrelic.enabled }}
-        - port_bindings:
-            - 5004:5004 # uwsgi
-        - binds:
-            # salt-rendered config
-            - /opt/loris/loris2.conf:/opt/loris/etc/loris2.conf
-            - /opt/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
-            - /opt/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
-            - /opt/loris/newrelic.ini:/etc/newrelic.ini
-            # directories (host:container)
-            # these paths are specified in `loris2.conf`
-            - {{ pillar.iiif.loris.storage }}/tmp:/tmp/loris2/tmp
-            - {{ pillar.iiif.loris.storage }}/cache-resolver:/usr/local/share/images/loris
-            - {{ pillar.iiif.loris.storage }}/cache-general:/var/cache/loris
-            # test directory with a filesystem (fs) resolver
-            - {{ pillar.iiif.loris.storage }}/test:/usr/local/share/images/loris-test
-        - log_driver: syslog # previously /var/log/uwsgi.log
+loris-docker-compose:
+    file.managed:
+        - name: /opt/loris/docker-compose.yaml
+        - source: salt://iiif/config/opt-loris-docker-compose.yaml
+        - template: jinja
         - require:
+            - loris-dir
+
+run-loris:
+    file.managed:
+        - name: /lib/systemd/system/iiif-service.service
+        - source: salt://iiif/config/lib-systemd-system-iiif-service.service
+        - template: jinja
+        - require:
+            - loris-docker-compose
+
+    service.running:
+        - name: iiif-service
+        - enable: True
+        - require:
+            - file: run-loris
+
             - get-loris
 
             - loris-cache-resolver
