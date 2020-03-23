@@ -190,8 +190,8 @@ run-loris:
 
 loris-nginx-ready:
     file.managed:
-        - name: /etc/nginx/sites-enabled/loris.conf
-        - source: salt://iiif/config/etc-nginx-sites-enabled-loris.conf
+        - name: /etc/nginx/sites-enabled/loris-container.conf
+        - source: salt://iiif/config/etc-nginx-sites-enabled-loris-container.conf
         - template: jinja
         - require:
             - run-loris
