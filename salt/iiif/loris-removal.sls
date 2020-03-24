@@ -11,6 +11,8 @@
 loris-{{ path }}-to-be-deleted:
     file.absent:
         - name: {{ path }}
+        - require_in:
+            - loris-cleaning-complete
 {% endfor %}
 
 loris-dependencies:
@@ -27,3 +29,9 @@ loris-dependencies:
             - libtiff5-dev
             - libxml2-dev
             - libxslt1-dev
+
+loris-cleaning-complete:
+    cmd.run:
+        - name: echo "loris cleanup complete"
+        - require:
+            - loris-dependencies

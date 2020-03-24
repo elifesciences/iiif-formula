@@ -194,6 +194,7 @@ loris-nginx-ready:
         - source: salt://iiif/config/etc-nginx-sites-enabled-loris-container.conf
         - template: jinja
         - require:
+            - loris-cleaning-complete
             - run-loris
         # restart nginx if web config has changed
         - watch_in:
