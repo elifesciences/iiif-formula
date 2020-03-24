@@ -6,7 +6,8 @@
     "/etc/init/uwsgi-loris.conf",
     "/etc/nginx/sites-enabled/unencrypted-redirect.conf",
     "/etc/logrotate.d/loris",
-    "/etc/nginx/sites-enabled/loris.conf"
+    "/etc/nginx/sites-enabled/loris.conf",
+    "/usr/local/bin/loris-smoke",
 ] %}
 loris-{{ path }}-to-be-deleted:
     file.absent:

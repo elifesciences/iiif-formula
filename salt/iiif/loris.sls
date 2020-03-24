@@ -278,13 +278,25 @@ maintenance-mode-check-nginx-stays-up:
         - require:
             - maintenance-mode-end
 
+loris-smoke.sh:
+    file.managed:
+        # lsh@2020-03: replaces /usr/local/bin/loris-smoke
+        - name: /opt/loris/smoke.sh
+        - source: salt://iiif/config/usr-local-bin-loris-smoke
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-repository
+
 loris-ready:
+    # all of loris.sls will be removed, but this state in particular has been replaced by loris-smoke.sh
     file.managed:
         - name: /usr/local/bin/loris-smoke
         - source: salt://iiif/config/usr-local-bin-loris-smoke
         - template: jinja
         - mode: 755
         - require:
+            - loris-smoke.sh
             - maintenance-mode-check-nginx-stays-up
 
     cmd.run:
