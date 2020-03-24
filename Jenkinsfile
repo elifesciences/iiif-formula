@@ -1,1 +1,1 @@
-elifeFormula('iiif')
+elifeFormula('iiif', '/opt/loris')

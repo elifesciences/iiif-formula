@@ -202,19 +202,21 @@ loris-nginx-ready:
 
 loris-ready:
     file.managed:
-        - name: /usr/local/bin/loris-smoke
+        # lsh@2020-03: replaces /usr/local/bin/loris-smoke
+        - name: /opt/loris/smoke.sh
         - source: salt://iiif/config/usr-local-bin-loris-smoke
         - template: jinja
         - mode: 755
         - require:
-            - loris-nginx-ready
+            - loris-dir
 
     cmd.run:
         - name: |
             set -e
             wait_for_port 80
-            loris-smoke
+            /opt/loris/smoke.sh
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - file: loris-ready
+            - loris-nginx-ready
 
