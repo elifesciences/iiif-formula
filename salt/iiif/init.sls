@@ -186,6 +186,13 @@ run-loris:
             # if run beforehand then the *directory* /opt/loris/newrelic.ini is created :(
             - newrelic-python-logfile-agent-in-ini-configuration
             {% endif %}
+        - watch:
+            {% if pillar.elife.newrelic.enabled %}
+            - newrelic-python-logfile-agent-in-ini-configuration
+            {% endif %}
+            - loris-wsgi-entry-point
+            - loris-uwsgi-config
+            - loris-config
 
 
 loris-nginx-ready:
