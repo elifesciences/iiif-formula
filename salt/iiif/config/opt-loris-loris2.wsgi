@@ -13,4 +13,5 @@ if os.environ.get("NEW_RELIC_ENABLED", "false").lower() == "true":
 
     # see the `Unsupported web frameworks` section:
     # - https://docs.newrelic.com/docs/agents/python-agent/installation-configuration/python-agent-integration
+    newrelic.agent.initialize(newrelic_licence_file)
     application = newrelic.agent.WSGIApplicationWrapper(application)
