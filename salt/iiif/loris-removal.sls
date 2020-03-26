@@ -31,8 +31,21 @@ loris-dependencies:
             - libxml2-dev
             - libxslt1-dev
 
+loris-cache-owner-changed:
+    cmd.run:
+        - cwd: {{ pillar.iiif.loris.storage }}
+        - name: |
+            set -e
+            chown www-data:www-data -R cache-resolver cache-general tmp
+            touch /root/loris-cache-owner-changed.flag
+        - creates: /root/loris-cache-owner-changed.flag
+        - onlyif:
+            # if the cache-resolver dir is there then the others will be as well
+            - test -d {{ pillar.iiif.loris.storage }}/cache-resolver
+
 loris-cleaning-complete:
     cmd.run:
         - name: echo "loris cleanup complete"
         - require:
             - loris-dependencies
+            - loris-cache-owner-changed
