@@ -33,15 +33,15 @@ loris-dependencies:
 
 loris-cache-owner-changed:
     cmd.run:
-        - cwd: {{ pillar.iiif.loris.storage }}
         - name: |
             set -e
+            cd {{ pillar.iiif.loris.storage }}
             chown www-data:www-data -R cache-resolver cache-general tmp
             touch /root/loris-cache-owner-changed.flag
         - creates: /root/loris-cache-owner-changed.flag
         - onlyif:
-            # if the cache-resolver dir is there then the others will be as well
-            - test -d {{ pillar.iiif.loris.storage }}/cache-resolver
+            # if the storage dir is there then the others will be as well
+            - test -d {{ pillar.iiif.loris.storage }}
 
 loris-cleaning-complete:
     cmd.run:
