@@ -1,7 +1,7 @@
 get-loris:
     docker_image.present:
         - name: elifesciences/loris:latest
-        - force: true
+        - force: true # always check remote
         - require:
             - docker-ready
 
@@ -201,7 +201,7 @@ loris-ready:
     file.managed:
         # lsh@2020-03: replaces /usr/local/bin/loris-smoke
         - name: /opt/loris/smoke.sh
-        - source: salt://iiif/config/usr-local-bin-loris-smoke
+        - source: salt://iiif/config/opt-loris-smoke.sh
         - template: jinja
         - mode: 755
         - require:
