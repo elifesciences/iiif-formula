@@ -1,0 +1,17 @@
+[Unit]
+Description=iiif container service
+After=docker.service
+Requires=docker.service
+Before=nginx.service
+ 
+[Service]
+TimeoutStartSec=0
+WorkingDirectory=/opt/loris
+ExecStart=/usr/local/bin/docker-compose up --detach
+ExecStop=/usr/local/bin/docker-compose down
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=
+Type=oneshot
+RemainAfterExit=true
+ 
+[Install]
+WantedBy=multi-user.target

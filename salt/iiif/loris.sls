@@ -1,9 +1,23 @@
+
+
+
+#
+# 2020-03: loris.sls is being replaced by init.sls 
+# the below is deprecated and will be removed once iiif is running stably in a container
+# 
+
+
+
+{% set osrelease = salt['grains.get']('osrelease') %}
+
+# lsh 2019-03-19: what problem is this trying to solve?
+# TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-start:
     cmd.run:
         - name: /etc/init.d/nginx stop
         - require:
             - nginx-server-service
-        
+
 loris-repository:
     git.latest:
         # read-only fork to cherry pick bugfixes
@@ -42,36 +56,45 @@ loris-dependencies:
             - libfreetype6
             - libfreetype6-dev
             - zlib1g-dev
+            {% if osrelease == "14.04" %}
             - liblcms
             - liblcms-dev
             - liblcms-utils
+            - libtiff4-dev
+            {% endif %}
+
             - liblcms2-2 
             - liblcms2-dev 
             - liblcms2-utils
-            - libtiff4-dev
             - libtiff5-dev
             - libxml2-dev
             - libxslt1-dev
 
+    # TODO: these requirements best live in a requirements.txt file where we can get security feedback
     cmd.run:
         - name: |
+            set -e
             venv/bin/pip install Werkzeug==0.12.1
             venv/bin/pip install configobj==5.0.6
             venv/bin/pip install Pillow==4.1.0
-            venv/bin/pip install uwsgi==2.0.14
+            venv/bin/pip install uwsgi==2.0.17.1
             NEW_RELIC_EXTENSIONS=false venv/bin/pip install --no-binary :all: newrelic==2.86.0.65
         - cwd: /opt/loris
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - loris-repository
             - pkg: loris-dependencies
-
 
 loris-user:
     user.present: 
         - name: loris
         - shell: /sbin/false
         - home: /home/loris
+        - uid: 1002
+        - require_in:
+            # see 'uwsgi' in pillar data and the builder-base-formula 'uwsgi.sls'
+            # this is: uwsgi-(service-name).log
+            - file: uwsgi-loris.log
 
 loris-images-folder:
     file.directory:
@@ -82,7 +105,7 @@ loris-setup:
     cmd.run:
         - name: |
             venv/bin/python setup.py install
-        - user: root
+        - runas: root
         - cwd: /opt/loris
         - require:
             - loris-dependencies
@@ -154,22 +177,34 @@ loris-wsgi-entry-point:
 
 loris-uwsgi-configuration:
     file.managed:
+        {% if osrelease == "14.04" %}
         - name: /etc/loris2/uwsgi.ini
+        {% else %}
+        # systemd service file expects to find uwsgi.ini in app folder
+        # see builder-base.uwsgi
+        - name: /opt/loris/uwsgi.ini
+        {% endif %}
         - source: salt://iiif/config/etc-loris2-uwsgi.ini
+        - template: jinja
         - require:
             - loris-setup
 
+# deprecated, systemd managed uwsgi will write to /var/log/uwsgi-loris.log
 loris-uwsgi-log:
+{% if osrelease == "14.04" %}
     file.managed:
         - name: /var/log/uwsgi-loris.log
         # don't want to lose any write to this
         - user: loris
         - group: loris
         - mode: 664
-
-loris-old-log-file:
-    file.absent:
-        - name: /var/log/loris2/loris.log
+{% else %}
+    # handled by state "uwsgi-$name.log" in "elife.uwsgi"
+    file.exists:
+        - name: /var/log/uwsgi-loris.log
+        - require:
+            - uwsgi-loris.log
+{% endif %}
 
 loris-application-log-directory:
     file.directory:
@@ -180,26 +215,45 @@ loris-application-log-directory:
         - require:
             - loris-config
 
-loris-uwsgi-ready:
+loris-uwsgi-upstart:
     file.managed:
         - name: /etc/init/uwsgi-loris.conf
         - source: salt://iiif/config/etc-init-uwsgi-loris.conf
         - template: jinja
-        - require:
-            - loris-uwsgi-configuration
-            - loris-uwsgi-log
-            - loris-application-log-directory
+        # lsh@2020-03: /etc/init doesn't exist any more in some cases
+        - makedirs: True
 
+{% if osrelease != "14.04" %}
+uwsgi-loris.socket:
+    service.running:
+        - enable: True
+        - require_in:
+            - service: loris-uwsgi-ready
+{% endif %}
+
+loris-uwsgi-ready:
     service.running:
         - name: uwsgi-loris
         - enable: True
         - restart: True
+        - require:
+            - loris-uwsgi-upstart
+            - loris-uwsgi-configuration
+            - loris-uwsgi-log
+            - loris-application-log-directory
         - watch:
             - loris-repository
             - loris-dependencies
             - loris-setup
             - loris-config
             - loris-wsgi-entry-point
+
+# temporary state: remove after file is absent
+# we use HSTS for the redirection, if any
+# we typically have port 80 closed externally and allow unencrypted internally
+loris-unencrypted-redirect:
+    file.absent:
+        - name: /etc/nginx/sites-enabled/unencrypted-redirect.conf
 
 loris-nginx-ready:
     file.managed:
@@ -208,33 +262,48 @@ loris-nginx-ready:
         - template: jinja
         - require:
             - loris-uwsgi-ready
+            - loris-unencrypted-redirect
 
+# TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-end:
     cmd.run:
         - name: /etc/init.d/nginx start
         - require:
             - file: loris-nginx-ready
 
+# TODO: sysv init system not supported. use systemd and salt service.* states
 maintenance-mode-check-nginx-stays-up:
     cmd.run:
         - name: sleep 2 && /etc/init.d/nginx status
         - require:
             - maintenance-mode-end
 
+loris-smoke.sh:
+    file.managed:
+        # lsh@2020-03: replaces /usr/local/bin/loris-smoke
+        - name: /opt/loris/smoke.sh
+        - source: salt://iiif/config/usr-local-bin-loris-smoke
+        - template: jinja
+        - mode: 755
+        - require:
+            - loris-repository
+
 loris-ready:
+    # all of loris.sls will be removed, but this state in particular has been replaced by loris-smoke.sh
     file.managed:
         - name: /usr/local/bin/loris-smoke
         - source: salt://iiif/config/usr-local-bin-loris-smoke
         - template: jinja
         - mode: 755
         - require:
+            - loris-smoke.sh
             - maintenance-mode-check-nginx-stays-up
 
     cmd.run:
         - name: |
             wait_for_port 80
             loris-smoke
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - file: loris-ready
 
@@ -295,9 +364,3 @@ loris-cache-clean:
         {% endif %}
         - require:
             - file: loris-cache-clean
-
-monitoring-utilities:
-    pkg.installed:
-        - pkgs:
-            - sysstat # iostat 1
-            - iotop # sudo iotop
