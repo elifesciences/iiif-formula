@@ -1,6 +1,7 @@
 get-loris:
     docker_image.present:
         - name: elifesciences/loris:latest
+        - force: true
         - require:
             - docker-ready
 
@@ -173,6 +174,9 @@ run-loris:
             - newrelic-python-logfile-agent-in-ini-configuration
             {% endif %}
         - watch:
+            # if the image has changed, restart
+            - get-loris
+            # if the config has changed, restart
             {% if pillar.elife.newrelic.enabled %}
             - newrelic-python-logfile-agent-in-ini-configuration
             {% endif %}
