@@ -143,6 +143,8 @@ build-loris:
         - force: true
         - require_in:
             - docker_container: run-loris
+        - watch_in:
+            - service: run-loris
         - onlyif:
             - test -d /vagrant/loris-docker
 
@@ -197,6 +199,7 @@ run-loris:
             - loris-wsgi-entry-point
             - loris-uwsgi-config
             - loris-config
+            - loris-docker-compose
 
 
 loris-nginx-ready:

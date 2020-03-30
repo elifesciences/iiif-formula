@@ -2,9 +2,11 @@ version: '3.7'
 services:
     uwsgi:
         image: "elifesciences/loris:latest"
-        hostname: {{ salt['elife.cfg']('project.full_hostname') }} # prod--iiif.elifesciences.org
+        hostname: {{ salt['elife.cfg']('project.full_hostname') }} # "prod--iiif.elifesciences.org"
         environment:
             NEW_RELIC_ENABLED: "{{ pillar.elife.newrelic.enabled }}"
+        logging: # https://docs.docker.com/compose/compose-file/#logging
+            driver: journald
         ports:
             - "5004:5004" # uwsgi
         volumes:
