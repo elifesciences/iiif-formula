@@ -52,17 +52,6 @@ loris-cache-resolver:
             - loris-user
             - mount-external-volume
 
-# empty folder that can be synced over the caches to clean them
-loris-cache-blank:
-    file.directory:
-        - name: {{ pillar.iiif.loris.storage }}/blank
-        - user: {{ loris_user }}
-        - group: {{ loris_user }}
-        - dir_mode: 755
-        - makedirs: True
-        - require:
-            - loris-user
-            - mount-external-volume
 
 
 # configuration files Docker will bind between host and container
@@ -161,7 +150,6 @@ run-loris:
             - loris-cache-resolver
             - loris-cache-general
             - loris-tmp-directory
-            - loris-cache-blank
 
             - loris-config
             - loris-newrelic-venv
