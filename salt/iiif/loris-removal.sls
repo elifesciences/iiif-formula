@@ -1,3 +1,13 @@
+uwsgi-loris-is-dead:
+    service.dead:
+        - enable: false
+        - name: uwsgi-loris
+
+uwsgi-loris-socket-is-dead:
+    service.dead:
+        - enable: false
+        - name: uwsgi-loris.socket
+
 {% for path in [
     "/etc/loris2/loris2.conf", 
     "/var/www/loris2/loris2.wsgi", 
@@ -8,10 +18,15 @@
     "/etc/logrotate.d/loris",
     "/etc/nginx/sites-enabled/loris.conf",
     "/usr/local/bin/loris-smoke",
+    "/lib/systemd/system/uwsgi-loris.service",
+    "/lib/systemd/system/uwsgi-loris.socket"
 ] %}
 loris-{{ path }}-to-be-deleted:
     file.absent:
         - name: {{ path }}
+        - require:
+            - uwsgi-loris-is-dead
+            - uwsgi-loris-socket-is-dead
         - require_in:
             - loris-cleaning-complete
 {% endfor %}

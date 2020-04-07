@@ -7,6 +7,9 @@ services:
             NEW_RELIC_ENABLED: "{{ pillar.elife.newrelic.enabled }}"
         logging: # https://docs.docker.com/compose/compose-file/#logging
             driver: journald
+            options:
+                # use 'uwsgi' instead of (obscure) process ID
+                tag: "uwsgi"
         ports:
             - "5004:5004" # uwsgi
         volumes:

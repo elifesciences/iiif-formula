@@ -36,16 +36,17 @@ if [ "$usage" -lt "$soft_limit" ]; then
     exit 0
 fi
 
-systemctl stop nginx
-
 if [ "$usage" -lt "$hard_limit" ]; then
-    log_message "Starting loris-cache-clean-soft"
-    timeout 240 /usr/local/bin/loris-cache-clean-soft "$soft_limit" || log_message "TIMEOUT OF loris-cache-clean-soft"
-    log_message "Completed loris-cache-clean-soft"
+#    systemctl stop nginx
+#    log_message "Starting loris-cache-clean-soft"
+#    timeout 240 /usr/local/bin/loris-cache-clean-soft "$soft_limit" || log_message "TIMEOUT OF loris-cache-clean-soft"
+#    log_message "Completed loris-cache-clean-soft"
+#    systemctl start nginx
+    log_message "Skipping loris-cache-clean-soft (disabled)"
 else
+    systemctl stop nginx
     log_message "Starting loris-cache-clean-hard"
     /usr/local/bin/loris-cache-clean-hard || log_message "FAILED loris-cache-clean-hard"
     log_message "Completed loris-cache-clean-hard"
+    systemctl start nginx
 fi
-
-systemctl start nginx

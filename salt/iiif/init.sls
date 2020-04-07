@@ -1,7 +1,7 @@
 get-loris:
     docker_image.present:
         - name: elifesciences/loris:latest
-        - force: true
+        - force: true # always check remote
         - require:
             - docker-ready
 
@@ -52,20 +52,9 @@ loris-cache-resolver:
             - loris-user
             - mount-external-volume
 
-# empty folder that can be synced over the caches to clean them
-loris-cache-blank:
-    file.directory:
-        - name: {{ pillar.iiif.loris.storage }}/blank
-        - user: {{ loris_user }}
-        - group: {{ loris_user }}
-        - dir_mode: 755
-        - makedirs: True
-        - require:
-            - loris-user
-            - mount-external-volume
 
 
-# Docker needs to bind certain configuration files between host and container
+# configuration files Docker will bind between host and container
 
 
 loris-dir:
@@ -73,6 +62,8 @@ loris-dir:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: /opt/loris
 
+# note: this state has a reverse requisite with newrelic-python.newrelic-python-license-configuration
+# see iiif pillar builder-private
 loris-config:
     file.managed:
         - user: {{ pillar.elife.deploy_user.username }}
@@ -93,22 +84,6 @@ loris-newrelic-venv:
             venv/bin/pip install newrelic==5.8.0.136
         - unless:
             - test -d /opt/loris/venv
-            
-# required by newrelic-python.sls because it's using builder-private and not the formula's pillar
-# todo: remove once builder-private changes are in and the service is removed
-loris-uwsgi-ready:
-    service.running:
-        - name: nginx # could be anything that should be enabled by default
-
-# required by newrelic-python.sls because it's using builder-private and not the formula's pillar
-# todo: remove once builder-private changes are in
-loris-setup:
-    cmd.run:
-        - name: "echo dummy state"
-        - require:
-            - loris-config
-            - loris-newrelic-venv
-            - loris-uwsgi-ready
 
 
 # newrelic-python.sls starts running about here
@@ -146,7 +121,7 @@ build-loris:
         - watch_in:
             - service: run-loris
         - onlyif:
-            - test -d /vagrant/loris-docker
+            - test -e /vagrant/loris-docker/Dockerfile
 
 {% endif %}        
 
@@ -177,7 +152,6 @@ run-loris:
             - loris-cache-resolver
             - loris-cache-general
             - loris-tmp-directory
-            - loris-cache-blank
 
             - loris-config
             - loris-newrelic-venv
@@ -218,7 +192,7 @@ loris-ready:
     file.managed:
         # lsh@2020-03: replaces /usr/local/bin/loris-smoke
         - name: /opt/loris/smoke.sh
-        - source: salt://iiif/config/usr-local-bin-loris-smoke
+        - source: salt://iiif/config/opt-loris-smoke.sh
         - template: jinja
         - mode: 755
         - require:
