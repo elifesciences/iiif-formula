@@ -1,5 +1,10 @@
 # the deviation checker is a script that checks the original image against those derived from IIIF
 
+install-deps:
+    pkg.installed:
+        - pkgs:
+            - imagemagick
+
 install-babashka:
     archive.extracted:
         - name: /usr/bin
