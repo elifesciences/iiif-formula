@@ -5,13 +5,11 @@ install-deps:
         - pkgs:
             - imagemagick
 
-install-babashka:
-    archive.extracted:
-        - name: /usr/bin
-        - source: https://github.com/borkdude/babashka/releases/download/v0.1.3/babashka-0.1.3-linux-static-amd64.zip
-        - source_hash: f01e1e6f4c6b8e25e8a88133569c79bb
-        - enforce_toplevel: False
-        - overwrite: True
+install-leiningen:
+    file.managed:
+        - name: /bin/lein
+        - source: salt://iiif/config/tmp-lein-install-script.sh
+        - mode: 0775
 
 install-checker:
     git.latest:
@@ -28,3 +26,21 @@ install-checker:
         - require:
             - git: install-checker
 
+disable-iiif-caching:
+    cmd.run:
+        - cwd: /opt/elife-iiif-deviation-checker
+        - runas: {{ pillar.elife.deploy_user.username }}
+        - name: ./disable-loris-caching.sh
+        - require:
+            - install-checker
+            - loris-ready
+
+# see `loris-maintenance.sls`
+# this restarts the service and interferes with the testing.
+# it's also unnecessary if iiif caching is disabled
+disable-loris-cache-clean:
+    cron.absent:
+        - identifier: loris-cache-clean
+        - require:
+            - loris-cache-clean
+            - disable-iiif-caching
