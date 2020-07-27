@@ -34,8 +34,7 @@ disable-iiif-caching:
         - require:
             - install-checker
             - loris-ready
-        - watch_in:
-            - service: run-loris
+        # loris-service is watching this file for changes
 
 # see `loris-maintenance.sls`
 # this restarts the service and interferes with the testing.
