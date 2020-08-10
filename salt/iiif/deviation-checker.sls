@@ -39,10 +39,20 @@ disable-iiif-caching:
 
 # see `loris-maintenance.sls`
 # this restarts the service and interferes with the testing.
-# it's also unnecessary if iiif caching is disabled
 disable-loris-cache-clean:
     cron.absent:
         - identifier: loris-cache-clean
         - require:
             - loris-cache-clean
             - disable-iiif-caching
+
+# because disabling the iiif-caching isn't working and files are still accumulating,
+# delete files older than 10 minutes every minute.
+enable-devchk-loris-cache-clean:
+    cron.present:
+        - identifier: devchk-loris-cache-clean
+        - name: test -d /ext/loris/ && /usr/bin/find /ext/loris/cache-resolver/ -mmin +10 -type f -delete
+        - user: root
+        #- minute: "*"
+        - require:
+            - file: loris-cache-clean
