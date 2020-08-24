@@ -1,0 +1,8 @@
+elifePipeline {
+    lock("iiif--devchk1") {
+        stage 'Load all articles .tif files', {
+            sh './run.sh'
+            archive './logs/report.json'
+        }
+    }
+}

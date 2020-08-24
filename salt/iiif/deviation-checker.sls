@@ -1,5 +1,21 @@
 # the deviation checker is a script that checks the original image against those derived from IIIF
 
+include:
+- iiif
+
+extend:
+    loris-nginx-ready:
+        file.managed:
+            - name: /etc/nginx/sites-enabled/loris-container.conf
+            - source: salt://iiif/config/etc-nginx-sites-enabled-loris-container.conf.devchk
+            - template: jinja
+
+    #loris-uwsgi-config:
+    #    file.managed:
+    #        - name: /opt/loris/uwsgi.ini
+    #        - source: salt://iiif/config/opt-loris-uwsgi.ini.devchk
+    #        - template: jinja
+
 install-deps:
     pkg.installed:
         - pkgs:
