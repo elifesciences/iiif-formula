@@ -5,11 +5,13 @@ services:
         hostname: {{ salt['elife.cfg']('project.full_hostname') }} # "prod--iiif.elifesciences.org"
         environment:
             NEW_RELIC_ENABLED: "{{ pillar.elife.newrelic.enabled }}"
-        logging: # https://docs.docker.com/compose/compose-file/#logging
-            driver: journald
-            options:
-                # use 'uwsgi' instead of (obscure) process ID
-                tag: "uwsgi"
+        # 2021-03-22: this makes the output unparseable for loggly so we can't target fields to create alerts.
+        # reverting to file based logging.
+        #logging: # https://docs.docker.com/compose/compose-file/#logging
+        #    driver: journald
+        #    options:
+        #        # use 'uwsgi' instead of (obscure) process ID
+        #        tag: "uwsgi"
         ports:
             - "5004:5004" # uwsgi
         volumes:
@@ -23,5 +25,6 @@ services:
             - {{ pillar.iiif.loris.storage }}/tmp:/tmp/loris2/tmp
             - {{ pillar.iiif.loris.storage }}/cache-resolver:/usr/local/share/images/loris
             - {{ pillar.iiif.loris.storage }}/cache-general:/var/cache/loris
+            - {{ pillar.iiif.loris.storage }}/log:/opt/loris/log
             # test directory with a filesystem (fs) resolver
             - {{ pillar.iiif.loris.storage }}/test:/usr/local/share/images/loris-test
