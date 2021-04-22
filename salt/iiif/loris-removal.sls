@@ -55,8 +55,7 @@ loris-cache-owner-changed:
             touch /root/loris-cache-owner-changed.flag
         - creates: /root/loris-cache-owner-changed.flag
         - onlyif:
-            # if the storage dir is there then the others will be as well
-            - test -d {{ pillar.iiif.loris.storage }}
+            - test -d {{ pillar.iiif.loris.storage }}/cache-resolver || test -d {{ pillar.iiif.loris.storage }}/cache-general || test -d {{ pillar.iiif.loris.storage }}/tmp
 
 loris-cleaning-complete:
     cmd.run:
