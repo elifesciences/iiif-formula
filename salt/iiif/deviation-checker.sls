@@ -20,35 +20,48 @@ install-deps:
     pkg.installed:
         - pkgs:
             - imagemagick
+            - python3.8
+            - python3.8-venv
 
-install-leiningen:
-    file.managed:
+remove-leiningen:
+    file.absent:
         - name: /bin/lein
-        - source: salt://iiif/config/tmp-lein-install-script.sh
-        - mode: 0775
+        
+remove-old-checker:
+    file.absent:
+        - name: /opt/elife-iiif-deviation-checker
 
 install-checker:
-    git.latest:
-        - name: https://github.com/elifesciences/elife-iiif-deviation-checker
-        - target: /opt/elife-iiif-deviation-checker
-    
+
     file.directory:
-        - name: /opt/elife-iiif-deviation-checker
+        - name: /opt/iiif-deviation-checker
         - user: {{ pillar.elife.deploy_user.username }}
         - group: {{ pillar.elife.deploy_user.username }}
-        - recurse:
-            - user
-            - group
+
+    builder.git_latest:
+        - name: git@github.com:elifesciences/iiif-deviation-checker.git
+        - identity: {{ pillar.elife.projects_builder.key or '' }}
+        - rev: develop
+        - branch: develop
+        - target: /opt/iiif-deviation-checker
+        - user: {{ pillar.elife.deploy_user.username }}
         - require:
-            - git: install-checker
+            - file: install-checker
+
+    cmd.run:
+        - user: {{ pillar.elife.deploy_user.username }}
+        - cwd: /opt/iiif-deviation-checker
+        - name: ./install.sh
+        - require:
+            - builder: install-checker
 
 disable-iiif-caching:
     cmd.run:
-        - cwd: /opt/elife-iiif-deviation-checker
         - runas: {{ pillar.elife.deploy_user.username }}
         - name: ./disable-loris-caching.sh
+        - name: |
+            sed --in-place 's/enable_caching = True/enable_caching = False/g' /opt/loris/loris2.conf
         - require:
-            - install-checker
             - loris-ready
         - listen_in:
             - service: run-loris
