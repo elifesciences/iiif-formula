@@ -78,11 +78,11 @@ disable-loris-cache-clean:
 # because disabling the iiif-caching isn't working and files are still accumulating,
 # delete files older than 10 minutes every minute.
 enable-devchk-loris-cache-clean:
-    #cron.present:
-    cron.absent:
-        - identifier: devchk-loris-cache-clean
-        - name: test -d /ext/loris/ && /usr/bin/find /ext/loris/cache-resolver/ -mmin +10 -type f -delete
+    cron.present:
+        - identifier: original-loris-cache-clean
+        - name: /usr/local/bin/original-loris-cache-clean
         - user: root
-        #- minute: "*"
+        # every thirty minutes
+        - minute: "*/30"
         - require:
-            - file: loris-cache-clean
+            - file: loris-original-cache-clean
