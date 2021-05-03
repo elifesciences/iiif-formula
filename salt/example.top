@@ -13,5 +13,5 @@ base:
         - iiif.loris-maintenance
 
         # deviation checker
-        - elife.java8 
+        - elife.swapspace
         - iiif.deviation-checker
