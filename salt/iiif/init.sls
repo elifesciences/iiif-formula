@@ -52,6 +52,15 @@ loris-cache-resolver:
             - loris-user
             - mount-external-volume
 
+loris-log-directory:
+    file.directory:
+        - name: {{ pillar.iiif.loris.storage }}/log
+        - user: {{ loris_user }}
+        - group: {{ loris_user }}
+        - makedirs: True
+        - require:
+            - loris-user
+            - mount-external-volume
 
 
 # configuration files Docker will bind between host and container
@@ -125,6 +134,17 @@ build-loris:
 
 {% endif %}        
 
+log-file-monitoring:
+    file.managed:
+        - name: /etc/syslog-ng/conf.d/loris.conf
+        - source: salt://iiif/config/etc-syslog-ng-conf.d-loris.conf
+        - template: jinja
+        - require:
+            - loris-log-directory
+        - watch_in:
+            - service: syslog-ng
+
+
 loris-docker-compose:
     file.managed:
         - name: /opt/loris/docker-compose.yaml
@@ -152,6 +172,7 @@ run-loris:
             - loris-cache-resolver
             - loris-cache-general
             - loris-tmp-directory
+            - loris-log-directory
 
             - loris-config
             - loris-newrelic-venv
@@ -183,6 +204,7 @@ loris-nginx-ready:
         - template: jinja
         - require:
             - loris-cleaning-complete
+            - log-file-monitoring
             - run-loris
         # restart nginx if web config has changed
         - watch_in:
