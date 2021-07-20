@@ -1,0 +1,45 @@
+# a modified version of the loris nginx vhost
+# 1. the fallback hack is removed
+# 2. timeouts talking to uwsgi are increased
+
+upstream loris {
+    # 'max_fails' with a value of '0' disables the number of failed attempts to consider 
+    # before upstream is marked as unavailable for 10 seconds.
+    # see:
+    # - https://nginx.org/en/docs/http/ngx_http_upstream_module.html#max_fails
+    # - https://nginx.org/en/docs/http/ngx_http_upstream_module.html#fail_timeout
+    server localhost:5004 max_fails=0;
+}
+
+server {
+    listen 80;
+    server_name localhost;
+
+    charset     utf-8;
+    access_log /var/log/nginx/iiif.access.log combined_with_time;
+    error_log /var/log/nginx/iiif.error.log;
+
+    # Allow using proper IIIF prefixes rather than Loris's syntax
+    rewrite ^/({{ pillar.iiif.loris.templates.keys()|join("|") }})/(.*)$ /$1:$2;
+
+    location = /ping {
+        add_header Cache-Control "must-revalidate, no-cache, no-store, private";
+        add_header Content-Type "text/plain; charset=UTF-8";
+        return 200 "pong";
+    }
+
+    location / {
+        uwsgi_pass loris;
+        include uwsgi_params;
+
+        # defaults
+        #uwsgi_connect_timeout 60s;
+        #uwsgi_read_timeout 60s;
+        #uwsgi_send_timeout 60s;
+    }
+
+    location ~ .*/info.json$ {
+        uwsgi_pass loris;
+        include uwsgi_params;
+    }
+}
