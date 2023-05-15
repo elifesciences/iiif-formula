@@ -132,7 +132,7 @@ build-loris:
         - onlyif:
             - test -e /vagrant/loris-docker/Dockerfile
 
-{% endif %}        
+{% endif %}
 
 log-file-monitoring:
     file.managed:
@@ -144,6 +144,14 @@ log-file-monitoring:
         - watch_in:
             - service: syslog-ng
 
+
+loris-docker-compose-.env:
+    file.managed:
+        - name: /opt/loris/.env
+        - source: salt://iiif/config/opt-loris-.env
+        - template: jinja
+        - require:
+            - loris-dir
 
 loris-docker-compose:
     file.managed:
@@ -160,6 +168,7 @@ run-loris:
         - template: jinja
         - require:
             - loris-docker-compose
+            - loris-docker-compose-.env
 
     service.running:
         - name: iiif-service
@@ -195,6 +204,7 @@ run-loris:
             - loris-uwsgi-config
             - loris-config
             - loris-docker-compose
+            - loris-docker-compose-.env
 
 
 loris-nginx-ready:
@@ -203,7 +213,6 @@ loris-nginx-ready:
         - source: salt://iiif/config/etc-nginx-sites-enabled-loris-container.conf
         - template: jinja
         - require:
-            - loris-cleaning-complete
             - log-file-monitoring
             - run-loris
         # restart nginx if web config has changed
