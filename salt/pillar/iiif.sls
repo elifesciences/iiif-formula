@@ -21,10 +21,3 @@ iiif:
     fallback:
         # since some .tif make Loris explode, we fall back to the equivalent JPG
         tif: jpg
-        
-elife:
-    newrelic_python:
-        application_folder: /opt/loris
-        # deliberately empty so newrelic-python.sls won't restart anything
-        service:
-        dependency_state: loris-config

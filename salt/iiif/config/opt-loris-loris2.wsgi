@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os, sys
-import newrelic.agent
 from loris.webapp import create_app
 
 # lsh@2021-06-28: temporary until loris upgraded to 3.1.0+ and .conf file support exists.
@@ -12,13 +11,3 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = 256000000
 
 application = create_app(config_file_path='/opt/loris/etc/loris2.conf')
-
-if os.environ.get("NEW_RELIC_ENABLED", "false").lower() == "true":
-    newrelic_licence_file = "/etc/newrelic.ini"
-    if not os.path.exists(newrelic_licence_file):
-        raise SystemExit("newrelic licence file not found: %s" % newrelic_licence_file)
-
-    # see the `Unsupported web frameworks` section:
-    # - https://docs.newrelic.com/docs/agents/python-agent/installation-configuration/python-agent-integration
-    newrelic.agent.initialize(newrelic_licence_file)
-    application = newrelic.agent.WSGIApplicationWrapper(application)
