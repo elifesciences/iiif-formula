@@ -71,8 +71,6 @@ loris-dir:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: /opt/loris
 
-# note: this state has a reverse requisite with newrelic-python.newrelic-python-license-configuration
-# see iiif pillar builder-private
 loris-config:
     file.managed:
         - user: {{ pillar.elife.deploy_user.username }}
@@ -82,21 +80,6 @@ loris-config:
         - makedirs: True
         - require:
             - loris-dir
-
-# required by newrelic-python.sls as it uses the 'newrelic' installed in the venv to generate the licence file
-loris-newrelic-venv:
-    cmd.run:
-        - cwd: /opt/loris
-        - runas: {{ pillar.elife.deploy_user.username }}
-        - name: |
-            python3 -m venv venv
-            venv/bin/pip install newrelic==5.8.0.136
-        - unless:
-            - test -d /opt/loris/venv
-
-
-# newrelic-python.sls starts running about here
-
 
 loris-uwsgi-config:
     file.managed:
@@ -184,22 +167,13 @@ run-loris:
             - loris-log-directory
 
             - loris-config
-            - loris-newrelic-venv
             - loris-uwsgi-config
             - loris-wsgi-entry-point
 
-            {% if pillar.elife.newrelic.enabled %}
-            # ensure newrelic-python.sls has finished before we try running loris.
-            # if run beforehand then the *directory* /opt/loris/newrelic.ini is created :(
-            - newrelic-python-logfile-agent-in-ini-configuration
-            {% endif %}
         - watch:
             # if the image has changed, restart
             - get-loris
             # if the config has changed, restart
-            {% if pillar.elife.newrelic.enabled %}
-            - newrelic-python-logfile-agent-in-ini-configuration
-            {% endif %}
             - loris-wsgi-entry-point
             - loris-uwsgi-config
             - loris-config

@@ -4,8 +4,6 @@ base:
         - elife.nginx
         - elife.docker-native
         - elife.external-volume
-        # only does something on EC2
-        - elife.newrelic-python
         - iiif
         - iiif.loris-maintenance
 

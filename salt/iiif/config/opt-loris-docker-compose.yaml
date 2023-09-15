@@ -3,8 +3,6 @@ services:
     uwsgi:
         image: "elifesciences/loris:${IMAGE_TAG}"
         hostname: ${HOSTNAME} # "prod--iiif.elifesciences.org"
-        environment:
-            NEW_RELIC_ENABLED: "{{ pillar.elife.newrelic.enabled }}"
         # 2021-03-22: this makes the output unparseable for loggly so we can't target fields to create alerts.
         # reverting to file based logging.
         #logging: # https://docs.docker.com/compose/compose-file/#logging
@@ -19,7 +17,6 @@ services:
             - /opt/loris/loris2.conf:/opt/loris/etc/loris2.conf
             - /opt/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
             - /opt/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
-            - /opt/loris/newrelic.ini:/etc/newrelic.ini
             # directories (host:container)
             # these paths are specified in `loris2.conf`
             - {{ pillar.iiif.loris.storage }}/tmp:/tmp/loris2/tmp
