@@ -1,3 +1,4 @@
+# todo: can probably get rid of this state. docker-compose will fetch the image it needs
 get-loris:
     docker_image.present:
         - name: elifesciences/loris:latest
