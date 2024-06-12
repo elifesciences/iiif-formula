@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Run as root
+
+set -e
+
+IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
+IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
+
+log_message () {
+    echo "$1" >&2
+}
+
+log_message "Started loris-cache-clean-hard"
+
+log_message "Removing $IMG_CACHE_ROOT_DIR contents"
+rm -rf "$IMG_CACHE_ROOT_DIR"/*
+
+log_message "Removing $IMG_CACHE_DP_DIR contents"
+rm -rf "$IMG_CACHE_DP_DIR"/*
+
+log_message "Cache completely purged!"
+

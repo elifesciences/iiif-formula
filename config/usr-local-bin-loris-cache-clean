@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Run as root
+
+set -e
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: loris-cache-clean SOFT_MAX_SIZE_KILOBYTES HARD_MAX_SIZE_KILOBYTES"
+    exit 1
+fi
+
+current_usage_cache_root () {
+    df -k /path/to/cache --output=used | sed 1d
+}
+
+log_message () {
+    echo "$1" >&2
+}
+
+log_message "Started loris-cache-clean (arguments $1 $2)"
+
+soft_limit="$1"
+hard_limit="$2"
+
+usage=$(current_usage_cache_root)
+log_message "Cache at $usage kb"
+
+if [ "$usage" -lt "$soft_limit" ]; then
+    log_message "Nothing to do"
+    exit 0
+fi
+
+if [ "$usage" -lt "$hard_limit" ]; then
+    log_message "Skipping loris-cache-clean-soft (disabled)"
+else
+    log_message "Starting loris-cache-clean-hard"
+    /usr/local/bin/loris-cache-clean-hard || log_message "FAILED loris-cache-clean-hard"
+    log_message "Completed loris-cache-clean-hard"
+fi

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  uwsgi:
+    image: "elifesciences/loris:${IMAGE_TAG:-latest}"
+    hostname: "${HOSTNAME:-prod--iiif.elifesciences.org}"
+    ports:
+      - "5004:5004" # uwsgi
+    volumes:
+      - /ext/loris/loris2.conf:/opt/loris/etc/loris2.conf
+      - /ext/loris/loris2.wsgi:/var/www/loris2/loris2.wsgi
+      - /ext/loris/uwsgi.ini:/etc/loris2/uwsgi.ini
+      - ${LORIS_STORAGE}/tmp:/tmp/loris2/tmp
+      - ${LORIS_STORAGE}/cache-resolver:/usr/local/share/images/loris
+      - ${LORIS_STORAGE}/cache-general:/var/cache/loris
+      - ${LORIS_STORAGE}/log:/opt/loris/log
+      - ${LORIS_STORAGE}/test:/usr/local/share/images/loris-test
+    restart: always
+
+  get-loris:
+    image: "elifesciences/loris:${IMAGE_TAG:-latest}"
+    volumes:
+      - loris-storage:/var/lib/loris
+      - ./config/opt-loris-loris2.conf:/opt/loris/loris2.conf
+    environment:
+      - IMAGE_TAG=${IMAGE_TAG:-latest}
+      - HOSTNAME=${HOSTNAME:-localhost}
+    ports:
+      - "80:80"
+    restart: always
+
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
+      - loris-storage:/var/lib/loris
+      - ./config/etc-loris2-uwsgi.ini:/opt/loris/uwsgi.ini
+    environment:
+      - FLASK_ENV=development
+      - LORIS_CACHE_SOFT_LIMIT=${LORIS_CACHE_SOFT_LIMIT:-500M}
+      - LORIS_CACHE_HARD_LIMIT=${LORIS_CACHE_HARD_LIMIT:-1G}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - get-loris
+    restart: always
+
+volumes:
+  loris-storage:
+

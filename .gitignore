@@ -1,2 +1,16 @@
 /salt/top.sls
 /*.log
+*.pyc
+*.pyo
+__pycache__/
+venv/
+env/
+.venv/
+pip/
+pipenv/
+.env/
+.vscode/
+.idea/
+build/
+dist/
+.dockerignore

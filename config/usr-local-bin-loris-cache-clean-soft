@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Run as root
+
+set -e
+
+if [ "$#" -lt 1 ]; then
+    echo "Usage: loris-cache-clean-soft SOFT_MAX_SIZE_KILOBYTES"
+    echo "Sample: loris-cache-clean-soft 10000000"
+    exit 1
+fi
+
+log_message () {
+    echo "$1" >&2
+}
+
+log_message "Started loris-cache-clean-soft (arguments $1)"
+
+# Check that the cache directories...
+IMG_CACHE_ROOT_DIR="{{ pillar.iiif.loris.storage }}/cache-resolver"
+IMG_CACHE_DP_DIR="{{ pillar.iiif.loris.storage }}/cache-general"
+
+# ...is below a certain size...
+REDUCE_TO="$1"
+
+current_usage_cache_root () {
+    # -k like --block-size=1K
+    df -k "$IMG_CACHE_ROOT_DIR" --output=used | sed 1d
+}
+
+delete_total=0
+max_age=3 # days
+usage=$(current_usage_cache_root)
+start_size="$usage"
+run=1
+while [ "$usage" -gt "$REDUCE_TO" ] && [ "$max_age" -ge -1 ]; do
+    run=0
+    log_message "Setting max age to $max_age"
+
+    # files. loop (instead of -delete) so that we can keep count
+    log_message "Deleting $IMG_CACHE_ROOT_DIR loris_cache.* old files"
+    find "$IMG_CACHE_ROOT_DIR" -name "loris_cache.*" -type f -atime +$max_age -exec rm {} \;
+    
+    # files. loop (instead of -delete) so that we can keep count
+    log_message "Deleting $IMG_CACHE_DP_DIR old files"
+    find "$IMG_CACHE_DP_DIR" -type f -atime +$max_age -exec rm {} \;
+
+    # empty directories
+    log_message "Deleting $IMG_CACHE_ROOT_DIR empty directories"
+    find "$IMG_CACHE_ROOT_DIR" -mindepth 1 -type d -empty -delete
+    log_message "Deleting $IMG_CACHE_DP_DIR empty directories"
+    find "$IMG_CACHE_DP_DIR" -mindepth 1 -type d -empty -delete
+
+    let max_age-=1 || true
+    usage=$(current_usage_cache_root)
+done
+
+if [ "$run" == 0 ]; then
+    log_message "Deleted $delete_total files to get cache from $start_size kb to $usage kb."
+else
+    log_message "Cache at $usage kb (no deletes required)."
+fi
+
+
+
+
+
