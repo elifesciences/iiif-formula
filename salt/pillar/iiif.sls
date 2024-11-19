@@ -1,3 +1,7 @@
+elife:
+    webserver:
+        app: caddy
+        
 iiif:
     loris:
         storage: /ext/loris

@@ -109,7 +109,7 @@ build-loris:
         - build: /vagrant/loris-docker
         - force: true
         - require_in:
-            - docker_container: run-loris
+            - service: run-loris
         - watch_in:
             - service: run-loris
         - onlyif:
@@ -180,6 +180,19 @@ run-loris:
             - loris-docker-compose
             - loris-docker-compose-.env
 
+{% if pillar.elife.webserver.app == "caddy" %}
+loris-caddy-ready:
+    file.managed:
+        - name: /etc/caddy/sites.d/loris-container.conf
+        - source: salt://iiif/config/etc-caddy-sites.d-loris-container.conf
+        - template: jinja
+        - require:
+            - log-file-monitoring
+            - run-loris
+        # reload caddy if the configuration has changed
+        - watch_in:
+            - service: caddy-server-service
+{% else %}
 
 loris-nginx-ready:
     file.managed:
@@ -192,6 +205,7 @@ loris-nginx-ready:
         # restart nginx if web config has changed
         - watch_in:
             - service: nginx-server-service
+{% endif %}
 
 loris-ready:
     file.managed:
@@ -212,4 +226,5 @@ loris-ready:
         - require:
             - file: loris-ready
             - loris-nginx-ready
+            - loris-caddy-ready
 

@@ -2,7 +2,8 @@
 Description=iiif container service
 After=docker.service
 Requires=docker.service
-Before=nginx.service
+#Before=nginx.service
+Before=caddy.service
  
 [Service]
 TimeoutStartSec=0
