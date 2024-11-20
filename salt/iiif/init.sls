@@ -109,7 +109,7 @@ build-loris:
         - build: /vagrant/loris-docker
         - force: true
         - require_in:
-            - docker_container: run-loris
+            - servicer: run-loris
         - watch_in:
             - service: run-loris
         - onlyif:
