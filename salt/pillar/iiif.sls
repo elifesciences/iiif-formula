@@ -1,7 +1,3 @@
-elife:
-    webserver:
-        app: caddy
-        
 iiif:
     loris:
         protocol: socket
