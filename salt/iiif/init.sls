@@ -86,6 +86,8 @@ loris-uwsgi-config:
         - name: /opt/loris/uwsgi.ini
         - source: salt://iiif/config/opt-loris-uwsgi.ini
         - template: jinja
+        - context:
+            protocol: {{ pillar.iiif.loris.get("protocol", "socket") }} # becomes "--socket", "--http-socket", etc
         - require:
             - loris-dir
 
@@ -180,6 +182,21 @@ run-loris:
             - loris-docker-compose
             - loris-docker-compose-.env
 
+{% if pillar.elife.webserver.app == "caddy" %}
+loris-caddy-ready:
+    file.managed:
+        - name: /etc/caddy/sites.d/loris-container.conf
+        - source: salt://iiif/config/etc-caddy-sites.d-loris-container.conf
+        - template: jinja
+        - require:
+            - log-file-monitoring
+            - run-loris
+        - require_in:
+            - caddy-validate-config
+        # reload caddy if the configuration has changed
+        - watch_in:
+            - service: caddy-server-service
+{% else %}
 
 loris-nginx-ready:
     file.managed:
@@ -192,6 +209,7 @@ loris-nginx-ready:
         # restart nginx if web config has changed
         - watch_in:
             - service: nginx-server-service
+{% endif %}
 
 loris-ready:
     file.managed:
@@ -211,4 +229,9 @@ loris-ready:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - file: loris-ready
+            {% if pillar.elife.webserver.app == "caddy" %}
+            - loris-caddy-ready
+            {% else %}
             - loris-nginx-ready
+            {% endif %}
+

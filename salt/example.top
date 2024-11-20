@@ -2,6 +2,8 @@ base:
     '*':
         - elife
         - elife.nginx
+        #- elife.disable-nginx
+        #- elife.caddy
         - elife.docker-native
         - elife.external-volume
         - iiif

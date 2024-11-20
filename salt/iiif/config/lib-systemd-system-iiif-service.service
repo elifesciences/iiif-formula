@@ -2,7 +2,11 @@
 Description=iiif container service
 After=docker.service
 Requires=docker.service
+{% if pillar.elife.webserver.app == "caddy" %}
+Before=caddy.service
+{% else %}
 Before=nginx.service
+{% endif %}
  
 [Service]
 TimeoutStartSec=0
