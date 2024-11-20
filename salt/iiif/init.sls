@@ -225,6 +225,9 @@ loris-ready:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - file: loris-ready
-            - loris-nginx-ready
+            {% if pillar.elife.webserver.app == "caddy" %}
             - loris-caddy-ready
+            {% else %}
+            - loris-nginx-ready
+            {% endif %}
 
