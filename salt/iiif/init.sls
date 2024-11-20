@@ -189,6 +189,8 @@ loris-caddy-ready:
         - require:
             - log-file-monitoring
             - run-loris
+        - require_in:
+            - caddy-validate-config
         # reload caddy if the configuration has changed
         - watch_in:
             - service: caddy-server-service
