@@ -11,7 +11,7 @@ get-loris:
 {% set loris_user = pillar.elife.webserver.username %}
 
 loris-user:
-    user.present: 
+    user.present:
         - name: {{ loris_user }}
         #- uid: ... # on vagrant this is 1003, everywhere else it's 1002. www-data is consistently uid 33
         #- shell: /sbin/false
@@ -109,7 +109,7 @@ build-loris:
         - build: /vagrant/loris-docker
         - force: true
         - require_in:
-            - servicer: run-loris
+            - service: run-loris
         - watch_in:
             - service: run-loris
         - onlyif:
@@ -212,4 +212,3 @@ loris-ready:
         - require:
             - file: loris-ready
             - loris-nginx-ready
-
