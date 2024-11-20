@@ -86,6 +86,8 @@ loris-uwsgi-config:
         - name: /opt/loris/uwsgi.ini
         - source: salt://iiif/config/opt-loris-uwsgi.ini
         - template: jinja
+        - context:
+            protocol: {{ pillar.iiif.loris.get("protocol", "socket") }} # becomes "--socket", "--http-socket", etc
         - require:
             - loris-dir
 

@@ -4,6 +4,7 @@ elife:
         
 iiif:
     loris:
+        protocol: socket
         storage: /ext/loris
         cache:
             soft_limit: 2097152 # 2 GB
