@@ -1,6 +1,6 @@
 iiif:
     loris:
-        protocol: socket
+        protocol: http-socket
         storage: /ext/loris
         cache:
             soft_limit: 2097152 # 2 GB
@@ -22,3 +22,6 @@ iiif:
     fallback:
         # since some .tif make Loris explode, we fall back to the equivalent JPG
         tif: jpg
+elife:
+    webserver:
+        app: caddy
