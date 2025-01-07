@@ -12,9 +12,7 @@ Image.MAX_IMAGE_PIXELS = 256000000
 
 loris_application = create_app(config_file_path='/opt/loris/etc/loris2.conf')
 
-# wrap any non-werkzeug exceptions that come back in a 500 Error
-from werkzeug import Response
-
+# wrap any exceptions that make it this far in a non-descriptive 500 Error
 def application(environ, start_response):
     try:
         return loris_application(environ, start_response)
