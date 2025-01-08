@@ -10,4 +10,12 @@ from loris.webapp import create_app
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = 256000000
 
-application = create_app(config_file_path='/opt/loris/etc/loris2.conf')
+loris_application = create_app(config_file_path='/opt/loris/etc/loris2.conf')
+
+# wrap any exceptions that make it this far in a non-descriptive 500 Error
+def application(environ, start_response):
+    try:
+        return loris_application(environ, start_response)
+    except Exception:
+        start_response('500 Internal Server Error', [('Content-Type', 'text/plain')])
+        return ['Internal Server Error'.encode('utf-8')]
