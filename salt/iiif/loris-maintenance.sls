@@ -36,3 +36,14 @@ loris-cache-clean:
         {% endif %}
         - require:
             - file: loris-cache-clean
+
+# ---
+
+# cronjob that calls this in deviation-checker.sls
+loris-original-cache-clean:
+    file.managed:
+        - name: /usr/local/bin/original-loris-cache-clean
+        - source: https://raw.githubusercontent.com/loris-imageserver/loris/a4da900539a255b8ca286085201963349d58f9cc/bin/loris-cache_clean.sh
+        - source: salt://iiif/config/usr-local-bin-original-loris-cache-clean
+        - template: jinja
+        - mode: 755
